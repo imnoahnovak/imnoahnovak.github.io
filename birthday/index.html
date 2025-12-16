@@ -54,19 +54,7 @@
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
             border: 1px solid rgba(255, 255, 255, 0.18);
             text-align: center;
-            animation: glow 3s ease-in-out infinite;
             width: 100%;
-        }
-
-        @keyframes glow {
-            0%, 100% {
-                box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37),
-                            0 0 20px rgba(255, 255, 255, 0.3);
-            }
-            50% {
-                box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37),
-                            0 0 40px rgba(255, 255, 255, 0.5);
-            }
         }
 
         h1 {
@@ -175,8 +163,8 @@
         const ctx = canvas.getContext('2d');
 
         // Configuration constants
-        const MAX_CONFETTI_PARTICLES = 150;
-        const CONFETTI_GENERATION_INTERVAL = 200;
+        const MAX_CONFETTI_PARTICLES = 50;
+        const CONFETTI_GENERATION_INTERVAL = 400;
 
         // Set canvas size
         function resizeCanvas() {
@@ -276,11 +264,8 @@
 
         // Trigger confetti on button click
         function triggerConfetti() {
-            createConfettiBurst(150, canvas.width / 2, canvas.height / 2);
+            createConfettiBurst(50, canvas.width / 2, canvas.height / 2);
         }
-
-        // Initial confetti on page load
-        createConfettiBurst(200);
 
         // Start animation
         animate();
@@ -288,9 +273,7 @@
         // Add continuous gentle confetti rain
         setInterval(() => {
             if (confettiParticles.length < MAX_CONFETTI_PARTICLES) {
-                for (let i = 0; i < 3; i++) {
-                    confettiParticles.push(new Confetti());
-                }
+                confettiParticles.push(new Confetti());
             }
         }, CONFETTI_GENERATION_INTERVAL);
     </script>
