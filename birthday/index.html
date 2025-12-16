@@ -100,7 +100,7 @@
             box-shadow: 0 2px 10px 0 rgba(245, 87, 108, 0.5);
         }
 
-        .vibration-toggle {
+        .sensor-toggle {
             position: fixed;
             bottom: 20px;
             right: 20px;
@@ -122,12 +122,12 @@
             gap: 8px;
         }
 
-        .vibration-toggle:hover {
+        .sensor-toggle:hover {
             background: rgba(255, 255, 255, 0.3);
             transform: translateY(-2px);
         }
 
-        .vibration-toggle .icon {
+        .sensor-toggle .icon {
             font-size: 1.2rem;
         }
 
@@ -171,14 +171,14 @@
                 font-size: 0.9rem;
             }
 
-            .vibration-toggle {
+            .sensor-toggle {
                 bottom: 15px;
                 right: 15px;
                 padding: 10px 20px;
                 font-size: 0.85rem;
             }
 
-            .vibration-toggle .icon {
+            .sensor-toggle .icon {
                 font-size: 1rem;
             }
         }
@@ -187,9 +187,9 @@
 <body>
     <canvas id="confetti-canvas"></canvas>
     
-    <button class="vibration-toggle" id="vibration-toggle">
-        <span class="icon">📳</span>
-        <span class="text">Vibration On</span>
+    <button class="sensor-toggle" id="sensor-toggle">
+        <span class="icon">📱</span>
+        <span class="text">Motion Tilt On</span>
     </button>
     
     <div class="container">
@@ -216,7 +216,7 @@
         // Device sensor state
         let deviceTilt = { beta: 0, gamma: 0 }; // beta: front-to-back, gamma: left-to-right
         let deviceMotion = { x: 0, y: 0, z: 0 };
-        let vibrationEnabled = true;
+        let sensorsEnabled = true;
         let sensorsAvailable = false;
 
         // Set canvas size
@@ -251,8 +251,8 @@
             }
 
             update() {
-                // Apply device tilt drift if sensors are available
-                if (sensorsAvailable) {
+                // Apply device tilt drift if sensors are enabled and available
+                if (sensorsEnabled && sensorsAvailable) {
                     // gamma ranges from -90 to 90 (left to right tilt)
                     // beta ranges from -180 to 180 (front to back tilt)
                     const tiltDriftX = (deviceTilt.gamma || 0) * 0.05;
@@ -329,7 +329,6 @@
         // Trigger confetti on button click
         function triggerConfetti() {
             createConfettiBurst(50, canvas.width / 2, canvas.height / 2);
-            triggerVibration();
         }
 
         // Device orientation and motion handling
@@ -345,32 +344,6 @@
                 deviceMotion.x = acc.x || 0;
                 deviceMotion.y = acc.y || 0;
                 deviceMotion.z = acc.z || 0;
-                
-                // Calculate motion magnitude for vibration intensity
-                const magnitude = Math.sqrt(
-                    deviceMotion.x ** 2 + 
-                    deviceMotion.y ** 2 + 
-                    deviceMotion.z ** 2
-                );
-                
-                // Trigger vibration on significant motion
-                if (magnitude > 15 && vibrationEnabled) {
-                    const intensity = Math.min(Math.floor(magnitude / 2), 50);
-                    vibrate(intensity);
-                }
-            }
-        }
-
-        // Vibration support
-        function vibrate(duration = 30) {
-            if ('vibrate' in navigator && vibrationEnabled) {
-                navigator.vibrate(duration);
-            }
-        }
-
-        function triggerVibration() {
-            if (vibrationEnabled) {
-                vibrate(50); // Strong vibration on button click
             }
         }
 
@@ -393,29 +366,44 @@
 
         // Initialize device sensors
         function initializeSensors() {
+            if (sensorsEnabled) {
+                if (window.DeviceOrientationEvent) {
+                    window.addEventListener('deviceorientation', handleOrientation);
+                }
+                
+                if (window.DeviceMotionEvent) {
+                    window.addEventListener('devicemotion', handleMotion);
+                }
+            }
+        }
+        
+        // Disable device sensors
+        function disableSensors() {
             if (window.DeviceOrientationEvent) {
-                window.addEventListener('deviceorientation', handleOrientation);
+                window.removeEventListener('deviceorientation', handleOrientation);
             }
             
             if (window.DeviceMotionEvent) {
-                window.addEventListener('devicemotion', handleMotion);
+                window.removeEventListener('devicemotion', handleMotion);
             }
+            sensorsAvailable = false;
         }
 
-        // Vibration toggle functionality
-        const vibrationToggle = document.getElementById('vibration-toggle');
-        vibrationToggle.addEventListener('click', () => {
-            vibrationEnabled = !vibrationEnabled;
-            const icon = vibrationToggle.querySelector('.icon');
-            const text = vibrationToggle.querySelector('.text');
+        // Sensor toggle functionality
+        const sensorToggle = document.getElementById('sensor-toggle');
+        sensorToggle.addEventListener('click', () => {
+            sensorsEnabled = !sensorsEnabled;
+            const icon = sensorToggle.querySelector('.icon');
+            const text = sensorToggle.querySelector('.text');
             
-            if (vibrationEnabled) {
-                icon.textContent = '📳';
-                text.textContent = 'Vibration On';
-                vibrate(30); // Feedback vibration
+            if (sensorsEnabled) {
+                icon.textContent = '📱';
+                text.textContent = 'Motion Tilt On';
+                initializeSensors();
             } else {
                 icon.textContent = '🔕';
-                text.textContent = 'Vibration Off';
+                text.textContent = 'Motion Tilt Off';
+                disableSensors();
             }
         });
 
