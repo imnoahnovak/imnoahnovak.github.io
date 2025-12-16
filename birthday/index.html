@@ -100,6 +100,37 @@
             box-shadow: 0 2px 10px 0 rgba(245, 87, 108, 0.5);
         }
 
+        .vibration-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 3;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            padding: 12px 24px;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 4px 15px 0 rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .vibration-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .vibration-toggle .icon {
+            font-size: 1.2rem;
+        }
+
         /* Mobile responsiveness */
         @media (max-width: 768px) {
             .card {
@@ -139,11 +170,27 @@
                 padding: 12px 32px;
                 font-size: 0.9rem;
             }
+
+            .vibration-toggle {
+                bottom: 15px;
+                right: 15px;
+                padding: 10px 20px;
+                font-size: 0.85rem;
+            }
+
+            .vibration-toggle .icon {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
 <body>
     <canvas id="confetti-canvas"></canvas>
+    
+    <button class="vibration-toggle" id="vibration-toggle">
+        <span class="icon">📳</span>
+        <span class="text">Vibration On</span>
+    </button>
     
     <div class="container">
         <div class="card">
@@ -165,6 +212,12 @@
         // Configuration constants
         const MAX_CONFETTI_PARTICLES = 50;
         const CONFETTI_GENERATION_INTERVAL = 400;
+
+        // Device sensor state
+        let deviceTilt = { beta: 0, gamma: 0 }; // beta: front-to-back, gamma: left-to-right
+        let deviceMotion = { x: 0, y: 0, z: 0 };
+        let vibrationEnabled = true;
+        let sensorsAvailable = false;
 
         // Set canvas size
         function resizeCanvas() {
@@ -198,6 +251,17 @@
             }
 
             update() {
+                // Apply device tilt drift if sensors are available
+                if (sensorsAvailable) {
+                    // gamma ranges from -90 to 90 (left to right tilt)
+                    // beta ranges from -180 to 180 (front to back tilt)
+                    const tiltDriftX = (deviceTilt.gamma || 0) * 0.05;
+                    const tiltDriftY = (deviceTilt.beta || 0) * 0.02;
+                    
+                    this.x += tiltDriftX;
+                    this.speedX += tiltDriftX * 0.1;
+                }
+                
                 this.y += this.speedY;
                 this.x += this.speedX;
                 this.rotation += this.rotationSpeed;
@@ -265,7 +329,95 @@
         // Trigger confetti on button click
         function triggerConfetti() {
             createConfettiBurst(50, canvas.width / 2, canvas.height / 2);
+            triggerVibration();
         }
+
+        // Device orientation and motion handling
+        function handleOrientation(event) {
+            sensorsAvailable = true;
+            deviceTilt.beta = event.beta;   // -180 to 180 (front to back)
+            deviceTilt.gamma = event.gamma; // -90 to 90 (left to right)
+        }
+
+        function handleMotion(event) {
+            if (event.accelerationIncludingGravity) {
+                const acc = event.accelerationIncludingGravity;
+                deviceMotion.x = acc.x || 0;
+                deviceMotion.y = acc.y || 0;
+                deviceMotion.z = acc.z || 0;
+                
+                // Calculate motion magnitude for vibration intensity
+                const magnitude = Math.sqrt(
+                    deviceMotion.x ** 2 + 
+                    deviceMotion.y ** 2 + 
+                    deviceMotion.z ** 2
+                );
+                
+                // Trigger vibration on significant motion
+                if (magnitude > 15 && vibrationEnabled) {
+                    const intensity = Math.min(Math.floor(magnitude / 2), 50);
+                    vibrate(intensity);
+                }
+            }
+        }
+
+        // Vibration support
+        function vibrate(duration = 30) {
+            if ('vibrate' in navigator && vibrationEnabled) {
+                navigator.vibrate(duration);
+            }
+        }
+
+        function triggerVibration() {
+            if (vibrationEnabled) {
+                vibrate(50); // Strong vibration on button click
+            }
+        }
+
+        // Request device orientation permission (required for iOS 13+)
+        function requestSensorPermission() {
+            if (typeof DeviceOrientationEvent !== 'undefined' && 
+                typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            initializeSensors();
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                // Not iOS 13+ or permission not required
+                initializeSensors();
+            }
+        }
+
+        // Initialize device sensors
+        function initializeSensors() {
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientation', handleOrientation);
+            }
+            
+            if (window.DeviceMotionEvent) {
+                window.addEventListener('devicemotion', handleMotion);
+            }
+        }
+
+        // Vibration toggle functionality
+        const vibrationToggle = document.getElementById('vibration-toggle');
+        vibrationToggle.addEventListener('click', () => {
+            vibrationEnabled = !vibrationEnabled;
+            const icon = vibrationToggle.querySelector('.icon');
+            const text = vibrationToggle.querySelector('.text');
+            
+            if (vibrationEnabled) {
+                icon.textContent = '📳';
+                text.textContent = 'Vibration On';
+                vibrate(30); // Feedback vibration
+            } else {
+                icon.textContent = '🔕';
+                text.textContent = 'Vibration Off';
+            }
+        });
 
         // Start animation
         animate();
@@ -276,6 +428,19 @@
                 confettiParticles.push(new Confetti());
             }
         }, CONFETTI_GENERATION_INTERVAL);
+
+        // Request sensor permissions and initialize
+        // Automatically attempt to initialize sensors on page load
+        requestSensorPermission();
+
+        // For iOS devices, also try to request permission on first user interaction
+        let permissionRequested = false;
+        document.addEventListener('click', () => {
+            if (!permissionRequested) {
+                permissionRequested = true;
+                requestSensorPermission();
+            }
+        }, { once: true });
     </script>
 </body>
 </html>
