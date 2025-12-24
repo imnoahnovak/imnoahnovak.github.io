@@ -42,6 +42,12 @@
         let lastErrorMessage = '';
         let lastErrorTime = 0;
         const ERROR_THROTTLE_MS = 5000; // Don't show same error within 5 seconds
+        
+        // Benign error patterns (network/API failures we expect)
+        const BENIGN_PATTERNS = [
+            'fetch', 'network', 'CORS',
+            'Point fetch failed', 'Forecast fetch failed', 'Alerts fetch failed'
+        ];
 
         // Error reporting
         function showError(message, error) {
@@ -88,21 +94,12 @@
                     errorMsg = event.reason.message;
                 } else if (typeof event.reason === 'string') {
                     errorMsg = event.reason;
-                } else if (event.reason && typeof event.reason === 'object') {
-                    // Safely stringify with depth limit to avoid circular refs and sensitive data
-                    errorMsg = String(event.reason);
                 } else {
                     errorMsg = String(event.reason);
                 }
             } catch (e) {
                 errorMsg = 'Error stringifying rejection reason';
             }
-            
-            // Benign error patterns (network/API failures we expect)
-            const BENIGN_PATTERNS = [
-                'fetch', 'network', 'CORS',
-                'Point fetch failed', 'Forecast fetch failed', 'Alerts fetch failed'
-            ];
             
             const isBenign = BENIGN_PATTERNS.some(pattern => 
                 errorMsg.toLowerCase().includes(pattern.toLowerCase())
