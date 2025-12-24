@@ -312,7 +312,6 @@
                     <input type="number" id="weather-lon" step="0.0001" placeholder="-74.0060">
                 </div>
             </div>
-            <input type="text" id="weather-name" placeholder="Location name (e.g., New York, NY)">
         </div>
     </div>
 
@@ -368,7 +367,6 @@
             // Weather location
             document.getElementById('weather-lat').value = settings.weatherLocation.lat;
             document.getElementById('weather-lon').value = settings.weatherLocation.lon;
-            document.getElementById('weather-name').value = settings.weatherLocation.name;
             
             // Load panels
             renderPanels();
@@ -496,7 +494,7 @@
                 const weatherLocation = {
                     lat: parseFloat(document.getElementById('weather-lat').value),
                     lon: parseFloat(document.getElementById('weather-lon').value),
-                    name: document.getElementById('weather-name').value
+                    name: '' // Keep name property for backwards compatibility but don't display it
                 };
                 settingsManager.setSetting('weatherLocation', weatherLocation);
                 
