@@ -14,8 +14,8 @@
         <!-- Page indicators -->
         <div class="indicators" id="indicators"></div>
 
-        <!-- App drawer hint -->
-        <div class="drawer-hint">↑ Swipe up for apps</div>
+        <!-- App drawer button -->
+        <button class="drawer-button" id="drawer-button" aria-label="Open apps">Apps</button>
     </div>
 
     <!-- App Drawer -->
@@ -107,7 +107,7 @@
                                 </div>
                             </a>
                         </div>
-                        <div class="app-note">Swipe up anywhere to see all apps</div>
+                        <div class="app-note">Click "Apps" button to see all apps</div>
                     </div>
                     <div class="nav-hint">← Swipe to navigate →</div>
                 `
@@ -375,6 +375,7 @@
         }
 
         document.getElementById('close-drawer').addEventListener('click', closeDrawer);
+        document.getElementById('drawer-button').addEventListener('click', openDrawer);
 
         // Touch/swipe handling
         function handleTouchStart(e) {

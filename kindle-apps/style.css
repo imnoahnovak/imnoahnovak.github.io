@@ -84,7 +84,7 @@ body {
 }
 
 .weather-icon {
-  font-size: 64px;
+  font-size: 48px;
   margin-bottom: 15px;
 }
 
@@ -293,15 +293,25 @@ body {
   height: 100%;
 }
 
-/* Drawer hint */
-.drawer-hint {
+/* Drawer button (replaces previous swipe hint) */
+.drawer-button {
   position: absolute;
   bottom: 50px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 12px;
-  color: var(--muted-color);
-  text-align: center;
+  font-size: 14px;
+  padding: 10px 20px;
+  border: 2px solid var(--border-color);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.drawer-button:hover,
+.drawer-button:focus {
+  background-color: var(--text-color);
+  color: var(--background-color);
 }
 
 /* App Drawer */
@@ -383,8 +393,8 @@ body {
 }
 
 .drawer-app-icon {
-  width: 48px;
-  height: 48px;
+  width: 32px;
+  height: 32px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -433,8 +443,8 @@ body {
 }
 
 .weather-icon .icon {
-  width: 64px;
-  height: 64px;
+  width: 48px;
+  height: 48px;
 }
 
 .weather-icon svg {
@@ -454,8 +464,8 @@ body {
 
 /* App icon in quick links */
 .app-icon {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -490,8 +500,8 @@ body {
   }
 
   .weather-icon .icon {
-    width: 48px;
-    height: 48px;
+    width: 36px;
+    height: 36px;
   }
 
   .dashboard-title {
@@ -523,8 +533,8 @@ body {
   }
 
   .drawer-app-icon {
-    width: 40px;
-    height: 40px;
+    width: 28px;
+    height: 28px;
   }
 }
 
