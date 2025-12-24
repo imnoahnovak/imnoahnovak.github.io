@@ -23,6 +23,7 @@
             background-color: var(--background-color);
             color: var(--text-color);
             padding: 20px;
+            min-height: 100vh;
         }
 
         .header {
@@ -31,7 +32,7 @@
             align-items: center;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 2px solid #000000;
+            border-bottom: 2px solid var(--border-color);
         }
 
         h1 {
@@ -52,9 +53,141 @@
             color: var(--background-color);
         }
 
+        /* Note List View */
+        .note-list-view {
+            display: block;
+        }
+
+        .add-note-btn {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            background-color: var(--text-color);
+            color: var(--background-color);
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .add-note-btn:hover {
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .notes-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .note-item {
+            border: 2px solid var(--border-color);
+            padding: 15px;
+            cursor: pointer;
+        }
+
+        .note-item:hover {
+            background-color: var(--text-color);
+            color: var(--background-color);
+        }
+
+        .note-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .note-preview {
+            font-size: 14px;
+            color: var(--muted-color);
+            margin-bottom: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .note-item:hover .note-preview {
+            color: var(--background-color);
+            opacity: 0.8;
+        }
+
+        .note-meta {
+            font-size: 12px;
+            color: var(--muted-color);
+        }
+
+        .note-item:hover .note-meta {
+            color: var(--background-color);
+            opacity: 0.7;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--muted-color);
+            border: 2px solid var(--border-color);
+        }
+
+        /* Note Editor View */
+        .note-editor-view {
+            display: none;
+        }
+
+        .editor-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .editor-btn {
+            padding: 10px 20px;
+            border: 2px solid var(--border-color);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .editor-btn:hover {
+            background-color: var(--text-color);
+            color: var(--background-color);
+        }
+
+        .editor-btn.primary {
+            background-color: var(--text-color);
+            color: var(--background-color);
+        }
+
+        .editor-btn.primary:hover {
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .editor-btn.delete {
+            margin-left: auto;
+        }
+
+        .note-title-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin-bottom: 10px;
+        }
+
+        .note-title-input:focus {
+            outline: none;
+        }
+
         textarea {
             width: 100%;
-            min-height: 300px;
+            min-height: 400px;
             padding: 15px;
             border: 2px solid var(--border-color);
             font-family: Arial, sans-serif;
@@ -66,42 +199,13 @@
 
         textarea:focus {
             outline: none;
-            border-color: var(--border-color);
-        }
-
-        .controls {
-            margin-top: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .save-btn {
-            padding: 10px 20px;
-            border: 2px solid var(--border-color);
-            background-color: var(--text-color);
-            color: var(--background-color);
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .save-btn:hover {
-            background-color: var(--background-color);
-            color: var(--text-color);
         }
 
         .save-status {
+            margin-top: 10px;
             font-size: 14px;
             color: var(--muted-color);
-        }
-
-        .info {
-            margin-top: 20px;
-            padding: 15px;
-            border: 1px solid var(--border-color);
-            font-size: 14px;
-            color: var(--muted-color);
+            text-align: center;
         }
     </style>
 </head>
@@ -111,56 +215,204 @@
         <a href="../../index.html" class="back-link">← Dashboard</a>
     </div>
 
-    <textarea id="notepad" placeholder="Start typing your notes here..."></textarea>
-    
-    <div class="controls">
-        <button class="save-btn" id="save-btn">Save Now</button>
-        <div class="save-status" id="status">Auto-saves every 2 seconds</div>
+    <!-- Note List View -->
+    <div class="note-list-view" id="note-list-view">
+        <button class="add-note-btn" id="add-note-btn">+ New Note</button>
+        <div class="notes-list" id="notes-list"></div>
     </div>
 
-    <div class="info">
-        <strong>Tip:</strong> Your notes are saved locally in your browser. They will persist across sessions but clearing browser data will delete them.
+    <!-- Note Editor View -->
+    <div class="note-editor-view" id="note-editor-view">
+        <div class="editor-controls">
+            <button class="editor-btn" id="back-to-list-btn">← Back to Notes</button>
+            <button class="editor-btn primary" id="save-note-btn">Save</button>
+            <button class="editor-btn delete" id="delete-note-btn">Delete</button>
+        </div>
+        <input type="text" class="note-title-input" id="note-title" placeholder="Note Title">
+        <textarea id="note-content" placeholder="Start typing your note here..."></textarea>
+        <div class="save-status" id="save-status">Auto-saves every 2 seconds</div>
     </div>
 
     <script src="../../settings.js"></script>
     <script>
-        const textarea = document.getElementById('notepad');
-        const status = document.getElementById('status');
-        const STORAGE_KEY = 'kindle-notes';
+        const STORAGE_KEY = 'kindle-notes-v2';
         const AUTO_SAVE_DELAY = 2000; // milliseconds
-        let saveTimeout;
+        let notes = [];
+        let currentNoteId = null;
+        let saveTimeout = null;
 
-        // Load saved notes
+        // Load all notes
         function loadNotes() {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) {
-                textarea.value = saved;
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    notes = JSON.parse(stored);
+                } else {
+                    // Migration: check for old single note format
+                    const oldNote = localStorage.getItem('kindle-notes');
+                    if (oldNote && oldNote.trim()) {
+                        notes = [{
+                            id: Date.now(),
+                            title: 'My Note',
+                            content: oldNote,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        }];
+                        saveNotes();
+                    }
+                }
+            } catch (e) {
+                console.error('Error loading notes:', e);
+                notes = [];
             }
         }
 
-        // Save notes
+        // Save all notes
         function saveNotes() {
-            localStorage.setItem(STORAGE_KEY, textarea.value);
-            status.textContent = 'Saved at ' + new Date().toLocaleTimeString();
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+            } catch (e) {
+                console.error('Error saving notes:', e);
+            }
+        }
+
+        // Render note list
+        function renderNoteList() {
+            const listEl = document.getElementById('notes-list');
+            listEl.innerHTML = '';
+
+            if (notes.length === 0) {
+                listEl.innerHTML = '<div class="empty-state">No notes yet. Create one to get started!</div>';
+                return;
+            }
+
+            // Sort by updated date (most recent first)
+            const sortedNotes = [...notes].sort((a, b) => 
+                new Date(b.updatedAt) - new Date(a.updatedAt)
+            );
+
+            sortedNotes.forEach(note => {
+                const noteDiv = document.createElement('div');
+                noteDiv.className = 'note-item';
+                noteDiv.onclick = () => openNote(note.id);
+
+                const preview = note.content.substring(0, 100).replace(/\n/g, ' ');
+                const updated = new Date(note.updatedAt).toLocaleDateString();
+
+                noteDiv.innerHTML = `
+                    <div class="note-title">${escapeHtml(note.title || 'Untitled Note')}</div>
+                    <div class="note-preview">${escapeHtml(preview)}${note.content.length > 100 ? '...' : ''}</div>
+                    <div class="note-meta">Last updated: ${updated}</div>
+                `;
+
+                listEl.appendChild(noteDiv);
+            });
+        }
+
+        // Show list view
+        function showListView() {
+            document.getElementById('note-list-view').style.display = 'block';
+            document.getElementById('note-editor-view').style.display = 'none';
+            currentNoteId = null;
+            renderNoteList();
+        }
+
+        // Show editor view
+        function showEditorView() {
+            document.getElementById('note-list-view').style.display = 'none';
+            document.getElementById('note-editor-view').style.display = 'block';
+        }
+
+        // Create new note
+        function createNewNote() {
+            const newNote = {
+                id: Date.now(),
+                title: '',
+                content: '',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            notes.push(newNote);
+            saveNotes();
+            openNote(newNote.id);
+        }
+
+        // Open existing note
+        function openNote(id) {
+            currentNoteId = id;
+            const note = notes.find(n => n.id === id);
+            
+            if (!note) {
+                showListView();
+                return;
+            }
+
+            document.getElementById('note-title').value = note.title || '';
+            document.getElementById('note-content').value = note.content || '';
+            document.getElementById('save-status').textContent = 'Auto-saves every 2 seconds';
+            
+            showEditorView();
+        }
+
+        // Save current note
+        function saveCurrentNote() {
+            if (!currentNoteId) return;
+
+            const note = notes.find(n => n.id === currentNoteId);
+            if (!note) return;
+
+            note.title = document.getElementById('note-title').value.trim() || 'Untitled Note';
+            note.content = document.getElementById('note-content').value;
+            note.updatedAt = new Date().toISOString();
+
+            saveNotes();
+            document.getElementById('save-status').textContent = 'Saved at ' + new Date().toLocaleTimeString();
+        }
+
+        // Delete current note
+        function deleteCurrentNote() {
+            if (!currentNoteId) return;
+
+            if (confirm('Are you sure you want to delete this note?')) {
+                notes = notes.filter(n => n.id !== currentNoteId);
+                saveNotes();
+                showListView();
+            }
         }
 
         // Auto-save on input
-        textarea.addEventListener('input', () => {
+        function handleInput() {
             clearTimeout(saveTimeout);
-            status.textContent = 'Saving...';
-            saveTimeout = setTimeout(saveNotes, AUTO_SAVE_DELAY);
-        });
+            document.getElementById('save-status').textContent = 'Saving...';
+            saveTimeout = setTimeout(saveCurrentNote, AUTO_SAVE_DELAY);
+        }
 
-        // Manual save button
-        document.getElementById('save-btn').addEventListener('click', () => {
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Event listeners
+        document.getElementById('add-note-btn').addEventListener('click', createNewNote);
+        document.getElementById('back-to-list-btn').addEventListener('click', () => {
+            saveCurrentNote();
+            showListView();
+        });
+        document.getElementById('save-note-btn').addEventListener('click', () => {
             clearTimeout(saveTimeout);
-            saveNotes();
+            saveCurrentNote();
         });
+        document.getElementById('delete-note-btn').addEventListener('click', deleteCurrentNote);
+        document.getElementById('note-title').addEventListener('input', handleInput);
+        document.getElementById('note-content').addEventListener('input', handleInput);
 
-        // Apply theme and load notes
+        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             settingsManager.applyTheme();
             loadNotes();
+            showListView();
         });
     </script>
 </body>

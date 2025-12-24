@@ -23,9 +23,6 @@
             background-color: var(--background-color);
             color: var(--text-color);
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
         }
 
         .header {
@@ -55,26 +52,81 @@
             color: var(--background-color);
         }
 
-        .timer-container {
-            flex: 1;
+        .add-timer-btn {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            background-color: var(--text-color);
+            color: var(--background-color);
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .add-timer-btn:hover {
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .timers-list {
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            gap: 15px;
+        }
+
+        .timer-item {
+            border: 2px solid var(--border-color);
+            padding: 20px;
+        }
+
+        .timer-item.completed {
+            animation: flash 1s infinite;
+        }
+
+        @keyframes flash {
+            0%, 100% { background-color: var(--background-color); }
+            50% { background-color: var(--text-color); color: var(--background-color); }
+        }
+
+        .timer-header {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 30px;
+            margin-bottom: 15px;
+        }
+
+        .timer-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .timer-delete {
+            padding: 8px 12px;
+            border: 2px solid var(--border-color);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .timer-delete:hover {
+            background-color: var(--text-color);
+            color: var(--background-color);
         }
 
         .timer-display {
-            font-size: 72px;
+            font-size: 48px;
             font-weight: bold;
-            letter-spacing: 0.05em;
             text-align: center;
+            margin-bottom: 15px;
         }
 
         .timer-inputs {
             display: flex;
             gap: 10px;
-            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
         }
 
         .timer-input {
@@ -84,16 +136,16 @@
         }
 
         .timer-input label {
-            font-size: 14px;
+            font-size: 12px;
             margin-bottom: 5px;
             color: var(--muted-color);
         }
 
         .timer-input input {
-            width: 80px;
-            padding: 10px;
+            width: 60px;
+            padding: 8px;
             border: 2px solid var(--border-color);
-            font-size: 24px;
+            font-size: 18px;
             text-align: center;
             background-color: var(--background-color);
             color: var(--text-color);
@@ -102,17 +154,17 @@
         .timer-controls {
             display: flex;
             gap: 10px;
+            justify-content: center;
         }
 
         .timer-btn {
-            padding: 15px 30px;
+            padding: 12px 24px;
             border: 2px solid var(--border-color);
             background-color: var(--text-color);
             color: var(--background-color);
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            min-width: 120px;
         }
 
         .timer-btn:hover:not(:disabled) {
@@ -136,25 +188,26 @@
         }
 
         .timer-status {
-            font-size: 18px;
-            color: var(--muted-color);
             text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            color: var(--muted-color);
         }
 
         .presets {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
             justify-content: center;
-            margin-top: 20px;
+            margin-top: 10px;
         }
 
         .preset-btn {
-            padding: 10px 20px;
+            padding: 8px 12px;
             border: 2px solid var(--border-color);
             background-color: var(--background-color);
             color: var(--text-color);
-            font-size: 14px;
+            font-size: 12px;
             cursor: pointer;
         }
 
@@ -163,168 +216,239 @@
             color: var(--background-color);
         }
 
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--muted-color);
+            border: 2px solid var(--border-color);
+        }
+
         @media (max-width: 640px) {
             .timer-display {
-                font-size: 56px;
-            }
-            
-            .timer-input input {
-                width: 60px;
-                font-size: 20px;
-            }
-            
-            .timer-btn {
-                padding: 12px 20px;
-                font-size: 16px;
-                min-width: 100px;
+                font-size: 36px;
             }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Timer</h1>
+        <h1>Timers</h1>
         <a href="../../index.html" class="back-link">← Dashboard</a>
     </div>
 
-    <div class="timer-container">
-        <div class="timer-display" id="timer-display">00:00:00</div>
-        
-        <div class="timer-status" id="timer-status">Set your timer</div>
-        
-        <div class="timer-inputs" id="timer-inputs">
-            <div class="timer-input">
-                <label>Hours</label>
-                <input type="number" id="hours" min="0" max="23" value="0">
-            </div>
-            <div class="timer-input">
-                <label>Minutes</label>
-                <input type="number" id="minutes" min="0" max="59" value="5">
-            </div>
-            <div class="timer-input">
-                <label>Seconds</label>
-                <input type="number" id="seconds" min="0" max="59" value="0">
-            </div>
-        </div>
-        
-        <div class="timer-controls">
-            <button class="timer-btn" id="start-btn">Start</button>
-            <button class="timer-btn secondary" id="reset-btn">Reset</button>
-        </div>
-        
-        <div class="presets" id="presets">
-            <button class="preset-btn" onclick="setPreset(1, 0, 0)">1 min</button>
-            <button class="preset-btn" onclick="setPreset(5, 0, 0)">5 min</button>
-            <button class="preset-btn" onclick="setPreset(10, 0, 0)">10 min</button>
-            <button class="preset-btn" onclick="setPreset(15, 0, 0)">15 min</button>
-            <button class="preset-btn" onclick="setPreset(30, 0, 0)">30 min</button>
-            <button class="preset-btn" onclick="setPreset(0, 1, 0)">1 hour</button>
-        </div>
-    </div>
+    <button class="add-timer-btn" id="add-timer-btn">+ Add Timer</button>
+
+    <div class="timers-list" id="timers-list"></div>
 
     <script src="../../settings.js"></script>
     <script>
-        let timerInterval = null;
-        let remainingSeconds = 0;
-        let isRunning = false;
+        let timers = [];
+        let timerIntervals = {};
 
-        const display = document.getElementById('timer-display');
-        const status = document.getElementById('timer-status');
-        const startBtn = document.getElementById('start-btn');
-        const resetBtn = document.getElementById('reset-btn');
-        const inputsDiv = document.getElementById('timer-inputs');
-        const hoursInput = document.getElementById('hours');
-        const minutesInput = document.getElementById('minutes');
-        const secondsInput = document.getElementById('seconds');
-
-        function updateDisplay() {
-            const hours = Math.floor(remainingSeconds / 3600);
-            const minutes = Math.floor((remainingSeconds % 3600) / 60);
-            const seconds = remainingSeconds % 60;
-            
-            display.textContent = 
-                String(hours).padStart(2, '0') + ':' +
-                String(minutes).padStart(2, '0') + ':' +
-                String(seconds).padStart(2, '0');
+        // Timer class
+        class Timer {
+            constructor(id, name = 'Timer') {
+                this.id = id;
+                this.name = name;
+                this.totalSeconds = 0;
+                this.remainingSeconds = 0;
+                this.isRunning = false;
+                this.isCompleted = false;
+            }
         }
 
-        function startTimer() {
-            if (!isRunning) {
-                // Get time from inputs if not already running
-                if (remainingSeconds === 0) {
-                    const hours = parseInt(hoursInput.value) || 0;
-                    const minutes = parseInt(minutesInput.value) || 0;
-                    const seconds = parseInt(secondsInput.value) || 0;
-                    remainingSeconds = hours * 3600 + minutes * 60 + seconds;
+        // Add new timer
+        function addTimer() {
+            const timer = new Timer(Date.now(), `Timer ${timers.length + 1}`);
+            timers.push(timer);
+            renderTimers();
+        }
+
+        // Delete timer
+        function deleteTimer(id) {
+            if (confirm('Delete this timer?')) {
+                stopTimer(id);
+                timers = timers.filter(t => t.id !== id);
+                renderTimers();
+            }
+        }
+
+        // Start/pause timer
+        function toggleTimer(id) {
+            const timer = timers.find(t => t.id === id);
+            if (!timer) return;
+
+            if (!timer.isRunning) {
+                // Start or resume
+                if (timer.remainingSeconds === 0) {
+                    // Get time from inputs
+                    const hours = parseInt(document.getElementById(`hours-${id}`).value) || 0;
+                    const minutes = parseInt(document.getElementById(`minutes-${id}`).value) || 0;
+                    const seconds = parseInt(document.getElementById(`seconds-${id}`).value) || 0;
+                    timer.totalSeconds = hours * 3600 + minutes * 60 + seconds;
+                    timer.remainingSeconds = timer.totalSeconds;
                     
-                    if (remainingSeconds === 0) {
-                        status.textContent = 'Please set a time greater than 0';
+                    if (timer.remainingSeconds === 0) {
                         return;
                     }
                 }
                 
-                isRunning = true;
-                startBtn.textContent = 'Pause';
-                status.textContent = 'Timer running...';
-                inputsDiv.style.display = 'none';
+                timer.isRunning = true;
+                timer.isCompleted = false;
                 
-                timerInterval = setInterval(() => {
-                    if (remainingSeconds > 0) {
-                        remainingSeconds--;
-                        updateDisplay();
+                timerIntervals[id] = setInterval(() => {
+                    if (timer.remainingSeconds > 0) {
+                        timer.remainingSeconds--;
+                        updateTimerDisplay(id);
                     } else {
-                        finishTimer();
+                        completeTimer(id);
                     }
                 }, 1000);
             } else {
                 // Pause
-                isRunning = false;
-                startBtn.textContent = 'Resume';
-                status.textContent = 'Timer paused';
-                clearInterval(timerInterval);
+                timer.isRunning = false;
+                clearInterval(timerIntervals[id]);
             }
-        }
-
-        function resetTimer() {
-            isRunning = false;
-            clearInterval(timerInterval);
-            remainingSeconds = 0;
-            updateDisplay();
-            startBtn.textContent = 'Start';
-            status.textContent = 'Set your timer';
-            inputsDiv.style.display = 'flex';
-        }
-
-        function finishTimer() {
-            isRunning = false;
-            clearInterval(timerInterval);
-            remainingSeconds = 0;
-            updateDisplay();
-            startBtn.textContent = 'Start';
-            status.textContent = 'Time\'s up! ⏰';
-            inputsDiv.style.display = 'flex';
             
-            // Try to play a beep sound (may not work on all Kindle browsers)
-            try {
-                const beep = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIHGm98OScTgwOUKXh8LdjGwU7k9nzwX0yBSp+zPLaizsKFFyz6OuwWRYLS6Lh8rJrHgUpgM3y2Yg2CBxou/DknE4MDlCl4fC3YxsGO5LZ88J8MwUqfszy2og7ChRctujqsVkWC0ui4fKyax4FKoDN8tmINggcaLvw5JxODA5QpeHwt2MbBjuS2fPCfTMFKn3M8tqJOwsUXLbo6rFZFgtLouHysmsfBSqAzfLZiDYIHGi78OScTgwOUKXh8LdjGwY7ktnzwn0zBSp9zPLaiTsLFFy26OqxWRYLS6Lh8rJrHwUpgM3y2Yg2CB1ou/DknE4MDlCl4fC3YxsGOpLZ88J8MwUqfczy2ok7CxRctujqsVkWC0ui4fKyax8FKoDN8tmINggdaLvw5JxODA5QpeHwt2MbBjqS2fPCfDMFKn3M8tqJOwsUXLbo6rFZFgtLouHysmsfBSmAzfLZiDYIHWi78OScTgwOUKXh8LdjGwY6ktnzwnwzBSp9zPLaiTsLFFy26OqxWRYLS6Lh8rJrHwUpgM3y2Yg2CB1ou/DknE4MDlCl4fC3YxsGOpLZ88J8MwUqfczy2ok7CxRctujqsVkWC0ui4fKyax8FKYDN8tmINggdaLvw5JxODA5QpeHwt2MbBjqS2fPCfTMFKn3M8tqJOwsUXLbo6rBZFgtLouHysmsfBSmAzfLZiDYIHWi78OScTgwOUKXh8LdjGwY6ktnzwn0zBSp9zPLaiTsLFFy26OqxWRYLS6Lh8rJrHwUpgM3y2Yg2CB1ou/DknE4MDlCl4fC3YxsGOpLZ88J9MwUqfczy2ok7CxRctujqsVkWC0ui4fKyax8FKYDN8tmINggdaLvw5JxODA5QpeHwt2MbBjqS2fPCfTMFKn3M8tqJOwsUXLbo6rFZFgtLouHysmsfBSmAzfLZiDYIHWi78OScTgwOUKXh8LdjGwY6ktnzwn0zBSp9zPLaiTsLFFy26OqxWRYLS6Lh8rJrHwUpgM3y2Yg2CB1ou/DknE4MDlCl4fC3YxsGO5LZ88J9MwUqfczy2ok7CxRctujqsVkWC0ui4fKyax8FKYDN8tmINggdaLvw5JxODA5QpeHwt2MbBjuS2fPCfTMFKn3M8tqJOwsUXLbo6rFZFgtLouHysmsfBSmAzfLZiDYIHWi78OScTgwOUKXh8LdjGwY7ktnzwn0zBSp9zPLaiTsLFFy26OqxWRYLS6Lh8rJrHwUpgM3y2Yg2CB1ou/DknE4MDlCl4fC3YxsGO5LZ88J9MwUqfczy2ok7CxRctujqsVkWC0ui4fKyax8FKYDN8tmINggdaLvw5JxODA5QpeHwt2MbBjuS2fPCfTMFKn3M8tqJOwsUXLbo6rFZFgtLouHysmsfBSmAzfLZiDYIHWi78OScTg==');
-                beep.play().catch(() => {});
-            } catch (e) {
-                // Silent fail if audio not supported
+            renderTimers();
+        }
+
+        // Stop and reset timer
+        function stopTimer(id) {
+            const timer = timers.find(t => t.id === id);
+            if (!timer) return;
+
+            timer.isRunning = false;
+            timer.isCompleted = false;
+            timer.remainingSeconds = 0;
+            clearInterval(timerIntervals[id]);
+            renderTimers();
+        }
+
+        // Complete timer
+        function completeTimer(id) {
+            const timer = timers.find(t => t.id === id);
+            if (!timer) return;
+
+            timer.isRunning = false;
+            timer.isCompleted = true;
+            timer.remainingSeconds = 0;
+            clearInterval(timerIntervals[id]);
+            renderTimers();
+        }
+
+        // Update timer display
+        function updateTimerDisplay(id) {
+            const timer = timers.find(t => t.id === id);
+            if (!timer) return;
+
+            const displayEl = document.getElementById(`display-${id}`);
+            if (displayEl) {
+                displayEl.textContent = formatTime(timer.remainingSeconds);
             }
         }
 
-        function setPreset(hours, minutes, seconds) {
-            hoursInput.value = hours;
-            minutesInput.value = minutes;
-            secondsInput.value = seconds;
+        // Format time as HH:MM:SS
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            return String(hours).padStart(2, '0') + ':' +
+                   String(minutes).padStart(2, '0') + ':' +
+                   String(secs).padStart(2, '0');
         }
 
-        startBtn.addEventListener('click', startTimer);
-        resetBtn.addEventListener('click', resetTimer);
+        // Set preset time
+        function setPreset(id, hours, minutes, seconds) {
+            document.getElementById(`hours-${id}`).value = hours;
+            document.getElementById(`minutes-${id}`).value = minutes;
+            document.getElementById(`seconds-${id}`).value = seconds;
+        }
 
-        // Apply theme
+        // Render all timers
+        function renderTimers() {
+            const listEl = document.getElementById('timers-list');
+            listEl.innerHTML = '';
+
+            if (timers.length === 0) {
+                listEl.innerHTML = '<div class="empty-state">No timers yet. Add one to get started!</div>';
+                return;
+            }
+
+            timers.forEach(timer => {
+                const timerDiv = document.createElement('div');
+                timerDiv.className = 'timer-item' + (timer.isCompleted ? ' completed' : '');
+                timerDiv.id = `timer-${timer.id}`;
+
+                const statusText = timer.isCompleted ? "Time's up! ⏰" :
+                                 timer.isRunning ? 'Running...' :
+                                 timer.remainingSeconds > 0 ? 'Paused' :
+                                 'Set your time';
+
+                timerDiv.innerHTML = `
+                    <div class="timer-header">
+                        <div class="timer-name">${escapeHtml(timer.name)}</div>
+                        <button class="timer-delete" onclick="deleteTimer(${timer.id})">Delete</button>
+                    </div>
+                    
+                    <div class="timer-display" id="display-${timer.id}">${formatTime(timer.remainingSeconds)}</div>
+                    
+                    <div class="timer-status">${statusText}</div>
+                    
+                    ${!timer.isRunning && timer.remainingSeconds === 0 && !timer.isCompleted ? `
+                        <div class="timer-inputs">
+                            <div class="timer-input">
+                                <label>Hours</label>
+                                <input type="number" id="hours-${timer.id}" min="0" max="23" value="0">
+                            </div>
+                            <div class="timer-input">
+                                <label>Minutes</label>
+                                <input type="number" id="minutes-${timer.id}" min="0" max="59" value="5">
+                            </div>
+                            <div class="timer-input">
+                                <label>Seconds</label>
+                                <input type="number" id="seconds-${timer.id}" min="0" max="59" value="0">
+                            </div>
+                        </div>
+                        
+                        <div class="presets">
+                            <button class="preset-btn" onclick="setPreset(${timer.id}, 0, 1, 0)">1 min</button>
+                            <button class="preset-btn" onclick="setPreset(${timer.id}, 0, 5, 0)">5 min</button>
+                            <button class="preset-btn" onclick="setPreset(${timer.id}, 0, 10, 0)">10 min</button>
+                            <button class="preset-btn" onclick="setPreset(${timer.id}, 0, 15, 0)">15 min</button>
+                            <button class="preset-btn" onclick="setPreset(${timer.id}, 0, 30, 0)">30 min</button>
+                            <button class="preset-btn" onclick="setPreset(${timer.id}, 1, 0, 0)">1 hour</button>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="timer-controls">
+                        <button class="timer-btn" onclick="toggleTimer(${timer.id})">
+                            ${timer.isRunning ? 'Pause' : timer.remainingSeconds > 0 ? 'Resume' : 'Start'}
+                        </button>
+                        ${timer.remainingSeconds > 0 || timer.isCompleted ? `
+                            <button class="timer-btn secondary" onclick="stopTimer(${timer.id})">Reset</button>
+                        ` : ''}
+                    </div>
+                `;
+
+                listEl.appendChild(timerDiv);
+            });
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Event listeners
+        document.getElementById('add-timer-btn').addEventListener('click', addTimer);
+
+        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             settingsManager.applyTheme();
+            renderTimers();
         });
     </script>
 </body>
