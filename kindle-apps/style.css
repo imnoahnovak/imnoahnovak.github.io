@@ -293,9 +293,7 @@ body {
   height: 100%;
 }
 
-/* Drawer hint - removed, replaced with button */
-
-/* Drawer button */
+/* Drawer button (replaces previous swipe hint) */
 .drawer-button {
   position: absolute;
   bottom: 50px;
