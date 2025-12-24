@@ -1,21 +1,10 @@
 :root {
-  --background-color: #f4f1eb;
-  --text-color: #1f1a14;
-  --accent: #1a73e8;
-  --muted: #6b635c;
+  --background-color: #ffffff;
+  --text-color: #000000;
+  --accent: #000000;
+  --muted: #333333;
   --panel: #ffffff;
-  --border: #d9d2c7;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background-color: #0f0f10;
-    --text-color: #f4f4f6;
-    --accent: #7ab6ff;
-    --muted: #b3b1ad;
-    --panel: #1b1b1e;
-    --border: #2c2c30;
-  }
+  --border: #999999;
 }
 
 * {
@@ -40,11 +29,10 @@ body {
 }
 
 .hero {
-  background: linear-gradient(135deg, rgba(26, 115, 232, 0.08), rgba(26, 115, 232, 0.02));
-  border: 1px solid var(--border);
-  border-radius: 16px;
+  background: #ffffff;
+  border: 2px solid #000000;
+  border-radius: 0;
   padding: 24px;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.05);
 }
 
 .eyebrow {
@@ -74,19 +62,19 @@ h1 {
 }
 
 .pill {
-  background-color: rgba(26, 115, 232, 0.1);
-  color: #0a2f6f;
+  background-color: #ffffff;
+  color: #000000;
   padding: 8px 12px;
-  border-radius: 999px;
+  border: 1px solid #000000;
+  border-radius: 0;
   font-size: 13px;
 }
 
 .panel {
   background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 16px;
+  border: 2px solid #000000;
+  border-radius: 0;
   padding: 20px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
 }
 
 .panel-header {
@@ -111,10 +99,10 @@ h1 {
 }
 
 .app-card {
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  border: 2px solid #000000;
+  border-radius: 0;
   padding: 16px;
-  background: linear-gradient(180deg, rgba(26, 115, 232, 0.06), rgba(26, 115, 232, 0));
+  background: #ffffff;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -144,13 +132,13 @@ h1 {
   margin-top: auto;
   align-self: flex-start;
   text-decoration: none;
-  background-color: var(--accent);
-  color: #fff;
+  background-color: #ffffff;
+  color: #000000;
   padding: 10px 14px;
-  border-radius: 10px;
+  border: 2px solid #000000;
+  border-radius: 0;
   font-weight: 600;
   font-size: 14px;
-  box-shadow: 0 8px 18px rgba(26, 115, 232, 0.18);
 }
 
 .tips .tip-list {
@@ -174,8 +162,9 @@ h1 {
 .code-block {
   margin-top: 16px;
   padding: 12px;
-  background: rgba(0, 0, 0, 0.04);
-  border-radius: 12px;
+  background: #ffffff;
+  border: 2px solid #000000;
+  border-radius: 0;
   overflow-x: auto;
   font-size: 13px;
   color: var(--text-color);
