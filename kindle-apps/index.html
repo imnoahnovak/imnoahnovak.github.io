@@ -8,129 +8,235 @@
 </head>
 <body>
     <div class="dashboard-container">
-        <!-- Dashboard 1: Main - Clock, Date, Weather -->
-        <div class="dashboard active" id="dashboard-main">
-            <div class="dashboard-content">
-                <div class="time-display">
-                    <div id="clock" class="clock">--:--</div>
-                    <div id="date" class="date">Loading...</div>
-                </div>
-                <div class="weather-display">
-                    <div id="weather-icon" class="weather-icon"></div>
-                    <div id="temperature" class="temperature">--°</div>
-                    <div id="conditions" class="conditions">Loading weather...</div>
-                </div>
-            </div>
-            <div class="nav-hint">← Swipe to navigate →</div>
-        </div>
-
-        <!-- Dashboard 2: Weather Forecast -->
-        <div class="dashboard" id="dashboard-weather">
-            <div class="dashboard-content">
-                <h2 class="dashboard-title">Weather Forecast</h2>
-                <div id="forecast" class="forecast-list">
-                    <div class="loading">Loading forecast...</div>
-                </div>
-            </div>
-            <div class="nav-hint">← Swipe to navigate →</div>
-        </div>
-
-        <!-- Dashboard 3: Calendar -->
-        <div class="dashboard" id="dashboard-calendar">
-            <div class="dashboard-content">
-                <h2 class="dashboard-title">Calendar</h2>
-                <div id="calendar" class="calendar-view">
-                    <div class="calendar-header">
-                        <span id="month-year"></span>
-                    </div>
-                    <div class="calendar-grid" id="calendar-grid"></div>
-                </div>
-            </div>
-            <div class="nav-hint">← Swipe to navigate →</div>
-        </div>
-
-        <!-- Dashboard 4: Local Apps -->
-        <div class="dashboard" id="dashboard-apps">
-            <div class="dashboard-content">
-                <h2 class="dashboard-title">Local Apps</h2>
-                <div class="apps-list">
-                    <a href="./apps/notes/index.html" class="app-item app-link-item">
-                        <div class="app-name">Notes</div>
-                        <div class="app-desc">Simple notepad with auto-save</div>
-                    </a>
-                    <div class="app-item">
-                        <div class="app-name">Tasks</div>
-                        <div class="app-desc">Coming soon</div>
-                    </div>
-                    <div class="app-item">
-                        <div class="app-name">Timer</div>
-                        <div class="app-desc">Coming soon</div>
-                    </div>
-                </div>
-                <div class="app-note">Add custom apps in the /apps folder</div>
-            </div>
-            <div class="nav-hint">← Swipe to navigate →</div>
-        </div>
+        <!-- Dashboards will be inserted here dynamically -->
+        <div id="dashboards-wrapper"></div>
 
         <!-- Page indicators -->
-        <div class="indicators">
-            <span class="indicator active" data-index="0"></span>
-            <span class="indicator" data-index="1"></span>
-            <span class="indicator" data-index="2"></span>
-            <span class="indicator" data-index="3"></span>
+        <div class="indicators" id="indicators"></div>
+
+        <!-- App drawer hint -->
+        <div class="drawer-hint">↑ Swipe up for apps</div>
+    </div>
+
+    <!-- App Drawer -->
+    <div class="app-drawer" id="app-drawer">
+        <div class="drawer-header">
+            <h2>Apps</h2>
+            <button class="close-drawer" id="close-drawer">×</button>
+        </div>
+        <div class="drawer-apps" id="drawer-apps">
+            <!-- Apps will be inserted here -->
         </div>
     </div>
 
+    <script src="./settings.js"></script>
+    <script src="./icons.js"></script>
     <script>
         // Dashboard state
         let currentDashboard = 0;
-        const totalDashboards = 4;
+        let totalDashboards = 0;
         let touchStartX = 0;
         let touchEndX = 0;
+        let touchStartY = 0;
+        let touchEndY = 0;
+
+        // Available panels
+        const panelTemplates = {
+            'dashboard-main': {
+                title: 'Home',
+                render: () => `
+                    <div class="dashboard-content">
+                        <div class="time-display">
+                            <div id="clock" class="clock">--:--</div>
+                            <div id="date" class="date">Loading...</div>
+                        </div>
+                        <div class="weather-display">
+                            <div id="weather-icon" class="weather-icon"></div>
+                            <div id="temperature" class="temperature">--°</div>
+                            <div id="conditions" class="conditions">Loading weather...</div>
+                        </div>
+                    </div>
+                    <div class="nav-hint">← Swipe to navigate →</div>
+                `
+            },
+            'dashboard-weather': {
+                title: 'Weather Forecast',
+                render: () => `
+                    <div class="dashboard-content">
+                        <h2 class="dashboard-title">Weather Forecast</h2>
+                        <div id="forecast" class="forecast-list">
+                            <div class="loading">Loading forecast...</div>
+                        </div>
+                    </div>
+                    <div class="nav-hint">← Swipe to navigate →</div>
+                `
+            },
+            'dashboard-calendar': {
+                title: 'Calendar',
+                render: () => `
+                    <div class="dashboard-content">
+                        <h2 class="dashboard-title">Calendar</h2>
+                        <div id="calendar" class="calendar-view">
+                            <div class="calendar-header">
+                                <span id="month-year"></span>
+                            </div>
+                            <div class="calendar-grid" id="calendar-grid"></div>
+                        </div>
+                    </div>
+                    <div class="nav-hint">← Swipe to navigate →</div>
+                `
+            },
+            'dashboard-apps': {
+                title: 'Quick Links',
+                render: () => `
+                    <div class="dashboard-content">
+                        <h2 class="dashboard-title">Quick Links</h2>
+                        <div class="apps-list">
+                            <a href="./apps/notes/index.html" class="app-item app-link-item">
+                                <div class="app-icon" id="icon-notes"></div>
+                                <div>
+                                    <div class="app-name">Notes</div>
+                                    <div class="app-desc">Simple notepad with save</div>
+                                </div>
+                            </a>
+                            <a href="./apps/tasks/index.html" class="app-item app-link-item">
+                                <div class="app-icon" id="icon-tasks"></div>
+                                <div>
+                                    <div class="app-name">Tasks</div>
+                                    <div class="app-desc">To-do list manager</div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="app-note">Swipe up anywhere to see all apps</div>
+                    </div>
+                    <div class="nav-hint">← Swipe to navigate →</div>
+                `
+            }
+        };
+
+        // App list for drawer
+        const apps = [
+            { name: 'Notes', desc: 'Simple notepad with save', url: './apps/notes/index.html', icon: 'notes' },
+            { name: 'Tasks', desc: 'To-do list manager', url: './apps/tasks/index.html', icon: 'tasks' },
+            { name: 'Timer', desc: 'Countdown timer', url: './apps/timer/index.html', icon: 'timer' },
+            { name: 'Calculator', desc: 'Basic calculator', url: './apps/calculator/index.html', icon: 'calculator' },
+            { name: 'Settings', desc: 'Configure dashboard', url: './apps/settings/index.html', icon: 'settings' }
+        ];
+
+        // Initialize dashboards
+        function initDashboards() {
+            const wrapper = document.getElementById('dashboards-wrapper');
+            const indicators = document.getElementById('indicators');
+            wrapper.innerHTML = '';
+            indicators.innerHTML = '';
+
+            const enabledPanels = settingsManager.getEnabledPanels();
+            totalDashboards = enabledPanels.length;
+
+            enabledPanels.forEach((panel, index) => {
+                // Create dashboard
+                const dashboard = document.createElement('div');
+                dashboard.className = 'dashboard' + (index === 0 ? ' active' : '');
+                dashboard.id = panel.id;
+                dashboard.innerHTML = panelTemplates[panel.id].render();
+                wrapper.appendChild(dashboard);
+
+                // Create indicator
+                const indicator = document.createElement('span');
+                indicator.className = 'indicator' + (index === 0 ? ' active' : '');
+                indicator.dataset.index = index;
+                
+                // Use home icon for home panel, dot for others
+                if (panel.type === 'home') {
+                    const homeIcon = createIcon('ui', 'home', 'indicator-icon');
+                    indicator.appendChild(homeIcon);
+                } else {
+                    // Just use the default dot styling
+                }
+                
+                indicator.addEventListener('click', () => showDashboard(index));
+                indicators.appendChild(indicator);
+            });
+
+            // Initialize specific dashboards
+            updateTime();
+            fetchWeather();
+            generateCalendar();
+            
+            // Add icons to quick links panel if it exists
+            setTimeout(() => {
+                const notesIconEl = document.getElementById('icon-notes');
+                const tasksIconEl = document.getElementById('icon-tasks');
+                if (notesIconEl) {
+                    const notesIcon = createIcon('ui', 'notes');
+                    notesIconEl.appendChild(notesIcon);
+                }
+                if (tasksIconEl) {
+                    const tasksIcon = createIcon('ui', 'tasks');
+                    tasksIconEl.appendChild(tasksIcon);
+                }
+            }, 100);
+        }
+
+        // Initialize app drawer
+        function initAppDrawer() {
+            const drawerApps = document.getElementById('drawer-apps');
+            drawerApps.innerHTML = '';
+
+            apps.forEach(app => {
+                const appLink = document.createElement('a');
+                appLink.href = app.url;
+                appLink.className = 'drawer-app-item';
+                
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'drawer-app-icon';
+                const icon = createIcon('ui', app.icon);
+                iconDiv.appendChild(icon);
+                
+                const infoDiv = document.createElement('div');
+                infoDiv.innerHTML = `
+                    <div class="drawer-app-name">${app.name}</div>
+                    <div class="drawer-app-desc">${app.desc}</div>
+                `;
+                
+                appLink.appendChild(iconDiv);
+                appLink.appendChild(infoDiv);
+                drawerApps.appendChild(appLink);
+            });
+        }
 
         // Update clock and date
         function updateTime() {
             const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
+            const clockEl = document.getElementById('clock');
+            if (!clockEl) return;
+
+            const timeFormat = settingsManager.getSetting('timeFormat');
+            let hours = now.getHours();
             const minutes = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('clock').textContent = hours + ':' + minutes;
+            
+            if (timeFormat === '12hr') {
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? hours : 12; // 0 should be 12
+                clockEl.textContent = hours + ':' + minutes + ' ' + ampm;
+            } else {
+                clockEl.textContent = String(hours).padStart(2, '0') + ':' + minutes;
+            }
             
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('date').textContent = now.toLocaleDateString('en-US', options);
-        }
-
-        // Weather icons (simple text-based for black & white)
-        const weatherIcons = {
-            clear: '☀',
-            sunny: '☀',
-            cloudy: '☁',
-            'partly cloudy': '⛅',
-            rain: '☂',
-            rainy: '☂',
-            snow: '❄',
-            snowy: '❄',
-            thunderstorm: '⚡',
-            fog: '≋',
-            wind: '≈'
-        };
-
-        function getWeatherIcon(condition) {
-            const lower = condition.toLowerCase();
-            for (let key in weatherIcons) {
-                if (lower.includes(key)) {
-                    return weatherIcons[key];
-                }
+            const dateEl = document.getElementById('date');
+            if (dateEl) {
+                dateEl.textContent = now.toLocaleDateString('en-US', options);
             }
-            return '○';
         }
 
         // Fetch weather from weather.gov API
         async function fetchWeather() {
             try {
-                // Default to a location (user would need to customize this)
-                // Using NYC as default: lat=40.7128, lon=-74.0060
-                const lat = 40.7128;
-                const lon = -74.0060;
+                const location = settingsManager.getSetting('weatherLocation');
+                const lat = location.lat;
+                const lon = location.lon;
                 
                 // Get point data
                 const pointResponse = await fetch(`https://api.weather.gov/points/${lat},${lon}`);
@@ -144,46 +250,76 @@
                 
                 // Current conditions (first period)
                 const current = forecastData.properties.periods[0];
-                document.getElementById('temperature').textContent = current.temperature + '°' + current.temperatureUnit;
-                document.getElementById('conditions').textContent = current.shortForecast;
-                document.getElementById('weather-icon').textContent = getWeatherIcon(current.shortForecast);
+                const tempEl = document.getElementById('temperature');
+                const conditionsEl = document.getElementById('conditions');
+                const weatherIconEl = document.getElementById('weather-icon');
+                
+                if (tempEl) tempEl.textContent = current.temperature + '°' + current.temperatureUnit;
+                if (conditionsEl) conditionsEl.textContent = current.shortForecast;
+                if (weatherIconEl) {
+                    weatherIconEl.innerHTML = '';
+                    const icon = getWeatherIcon(current.shortForecast);
+                    weatherIconEl.appendChild(icon);
+                }
                 
                 // Forecast list
                 const forecastList = document.getElementById('forecast');
-                forecastList.innerHTML = '';
-                forecastData.properties.periods.slice(0, 7).forEach(period => {
-                    const item = document.createElement('div');
-                    item.className = 'forecast-item';
-                    item.innerHTML = `
-                        <div class="forecast-time">${period.name}</div>
-                        <div class="forecast-icon">${getWeatherIcon(period.shortForecast)}</div>
-                        <div class="forecast-temp">${period.temperature}°${period.temperatureUnit}</div>
-                        <div class="forecast-desc">${period.shortForecast}</div>
-                    `;
-                    forecastList.appendChild(item);
-                });
+                if (forecastList) {
+                    forecastList.innerHTML = '';
+                    forecastData.properties.periods.slice(0, 7).forEach(period => {
+                        const item = document.createElement('div');
+                        item.className = 'forecast-item';
+                        
+                        const iconDiv = document.createElement('div');
+                        iconDiv.className = 'forecast-icon';
+                        const icon = getWeatherIcon(period.shortForecast);
+                        iconDiv.appendChild(icon);
+                        
+                        item.innerHTML = `
+                            <div class="forecast-time">${period.name}</div>
+                        `;
+                        item.appendChild(iconDiv);
+                        item.innerHTML += `
+                            <div class="forecast-temp">${period.temperature}°${period.temperatureUnit}</div>
+                            <div class="forecast-desc">${period.shortForecast}</div>
+                        `;
+                        forecastList.appendChild(item);
+                    });
+                }
             } catch (error) {
-                document.getElementById('temperature').textContent = 'N/A';
-                document.getElementById('conditions').textContent = 'Weather unavailable';
-                document.getElementById('weather-icon').textContent = '○';
-                document.getElementById('forecast').innerHTML = '<div class="error">Unable to load forecast. Check location settings.</div>';
+                console.error('Weather fetch error:', error);
+                const tempEl = document.getElementById('temperature');
+                const conditionsEl = document.getElementById('conditions');
+                const weatherIconEl = document.getElementById('weather-icon');
+                const forecastList = document.getElementById('forecast');
+                
+                if (tempEl) tempEl.textContent = 'N/A';
+                if (conditionsEl) conditionsEl.textContent = 'Weather unavailable';
+                if (weatherIconEl) weatherIconEl.textContent = '○';
+                if (forecastList) {
+                    forecastList.innerHTML = '<div class="error">Unable to load forecast. Check location in settings.</div>';
+                }
             }
         }
 
         // Generate calendar
         function generateCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            if (!grid) return;
+
             const now = new Date();
             const year = now.getFullYear();
             const month = now.getMonth();
             
-            document.getElementById('month-year').textContent = 
-                new Date(year, month, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            const monthYearEl = document.getElementById('month-year');
+            if (monthYearEl) {
+                monthYearEl.textContent = new Date(year, month, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            }
             
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             const today = now.getDate();
             
-            const grid = document.getElementById('calendar-grid');
             grid.innerHTML = '';
             
             // Day headers
@@ -229,22 +365,46 @@
             currentDashboard = index;
         }
 
+        // App drawer controls
+        function openDrawer() {
+            document.getElementById('app-drawer').classList.add('open');
+        }
+
+        function closeDrawer() {
+            document.getElementById('app-drawer').classList.remove('open');
+        }
+
+        document.getElementById('close-drawer').addEventListener('click', closeDrawer);
+
         // Touch/swipe handling
         function handleTouchStart(e) {
             touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
         }
 
         function handleTouchEnd(e) {
             touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
             handleSwipe();
         }
 
         function handleSwipe() {
             const swipeThreshold = 50;
-            const diff = touchStartX - touchEndX;
+            const diffX = touchStartX - touchEndX;
+            const diffY = touchStartY - touchEndY;
             
-            if (Math.abs(diff) > swipeThreshold) {
-                if (diff > 0) {
+            // Check if it's primarily a vertical swipe
+            if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > swipeThreshold) {
+                if (diffY > 0) {
+                    // Swipe up - open drawer
+                    openDrawer();
+                }
+                return;
+            }
+            
+            // Horizontal swipe for panel navigation
+            if (Math.abs(diffX) > swipeThreshold) {
+                if (diffX > 0) {
                     // Swipe left - next dashboard
                     showDashboard(currentDashboard + 1);
                 } else {
@@ -260,30 +420,42 @@
                 showDashboard(currentDashboard - 1);
             } else if (e.key === 'ArrowRight') {
                 showDashboard(currentDashboard + 1);
+            } else if (e.key === 'ArrowUp') {
+                openDrawer();
+            } else if (e.key === 'Escape') {
+                closeDrawer();
             }
         }
 
-        // Click indicators
-        document.querySelectorAll('.indicator').forEach(ind => {
-            ind.addEventListener('click', () => {
-                showDashboard(parseInt(ind.dataset.index));
-            });
-        });
-
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            updateTime();
-            setInterval(updateTime, 60000); // Update every minute
+            // Apply theme
+            settingsManager.applyTheme();
             
-            fetchWeather();
-            setInterval(fetchWeather, 1800000); // Update every 30 minutes
+            // Initialize dashboards and drawer
+            initDashboards();
+            initAppDrawer();
             
-            generateCalendar();
+            // Update time every minute
+            setInterval(updateTime, 60000);
+            
+            // Update weather every 30 minutes
+            setInterval(fetchWeather, 1800000);
+            
+            // Update theme hourly (for time-based dark mode)
+            setInterval(() => settingsManager.applyTheme(), 3600000);
             
             // Event listeners
             document.addEventListener('touchstart', handleTouchStart);
             document.addEventListener('touchend', handleTouchEnd);
             document.addEventListener('keydown', handleKeyboard);
+            
+            // Close drawer when clicking backdrop
+            document.getElementById('app-drawer').addEventListener('click', (e) => {
+                if (e.target.id === 'app-drawer') {
+                    closeDrawer();
+                }
+            });
         });
     </script>
 </body>

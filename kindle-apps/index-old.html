@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="./style.css">
+    <title>Kindle Dashboard</title>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Dashboard 1: Main - Clock, Date, Weather -->
+        <div class="dashboard active" id="dashboard-main">
+            <div class="dashboard-content">
+                <div class="time-display">
+                    <div id="clock" class="clock">--:--</div>
+                    <div id="date" class="date">Loading...</div>
+                </div>
+                <div class="weather-display">
+                    <div id="weather-icon" class="weather-icon"></div>
+                    <div id="temperature" class="temperature">--°</div>
+                    <div id="conditions" class="conditions">Loading weather...</div>
+                </div>
+            </div>
+            <div class="nav-hint">← Swipe to navigate →</div>
+        </div>
+
+        <!-- Dashboard 2: Weather Forecast -->
+        <div class="dashboard" id="dashboard-weather">
+            <div class="dashboard-content">
+                <h2 class="dashboard-title">Weather Forecast</h2>
+                <div id="forecast" class="forecast-list">
+                    <div class="loading">Loading forecast...</div>
+                </div>
+            </div>
+            <div class="nav-hint">← Swipe to navigate →</div>
+        </div>
+
+        <!-- Dashboard 3: Calendar -->
+        <div class="dashboard" id="dashboard-calendar">
+            <div class="dashboard-content">
+                <h2 class="dashboard-title">Calendar</h2>
+                <div id="calendar" class="calendar-view">
+                    <div class="calendar-header">
+                        <span id="month-year"></span>
+                    </div>
+                    <div class="calendar-grid" id="calendar-grid"></div>
+                </div>
+            </div>
+            <div class="nav-hint">← Swipe to navigate →</div>
+        </div>
+
+        <!-- Dashboard 4: Local Apps -->
+        <div class="dashboard" id="dashboard-apps">
+            <div class="dashboard-content">
+                <h2 class="dashboard-title">Local Apps</h2>
+                <div class="apps-list">
+                    <a href="./apps/notes/index.html" class="app-item app-link-item">
+                        <div class="app-name">Notes</div>
+                        <div class="app-desc">Simple notepad with auto-save</div>
+                    </a>
+                    <div class="app-item">
+                        <div class="app-name">Tasks</div>
+                        <div class="app-desc">Coming soon</div>
+                    </div>
+                    <div class="app-item">
+                        <div class="app-name">Timer</div>
+                        <div class="app-desc">Coming soon</div>
+                    </div>
+                </div>
+                <div class="app-note">Add custom apps in the /apps folder</div>
+            </div>
+            <div class="nav-hint">← Swipe to navigate →</div>
+        </div>
+
+        <!-- Page indicators -->
+        <div class="indicators">
+            <span class="indicator active" data-index="0"></span>
+            <span class="indicator" data-index="1"></span>
+            <span class="indicator" data-index="2"></span>
+            <span class="indicator" data-index="3"></span>
+        </div>
+    </div>
+
+    <script>
+        // Dashboard state
+        let currentDashboard = 0;
+        const totalDashboards = 4;
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        // Update clock and date
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('clock').textContent = hours + ':' + minutes;
+            
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('date').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        // Weather icons (simple text-based for black & white)
+        const weatherIcons = {
+            clear: '☀',
+            sunny: '☀',
+            cloudy: '☁',
+            'partly cloudy': '⛅',
+            rain: '☂',
+            rainy: '☂',
+            snow: '❄',
+            snowy: '❄',
+            thunderstorm: '⚡',
+            fog: '≋',
+            wind: '≈'
+        };
+
+        function getWeatherIcon(condition) {
+            const lower = condition.toLowerCase();
+            for (let key in weatherIcons) {
+                if (lower.includes(key)) {
+                    return weatherIcons[key];
+                }
+            }
+            return '○';
+        }
+
+        // Fetch weather from weather.gov API
+        async function fetchWeather() {
+            try {
+                // Default to a location (user would need to customize this)
+                // Using NYC as default: lat=40.7128, lon=-74.0060
+                const lat = 40.7128;
+                const lon = -74.0060;
+                
+                // Get point data
+                const pointResponse = await fetch(`https://api.weather.gov/points/${lat},${lon}`);
+                if (!pointResponse.ok) throw new Error('Point fetch failed');
+                const pointData = await pointResponse.json();
+                
+                // Get forecast
+                const forecastResponse = await fetch(pointData.properties.forecast);
+                if (!forecastResponse.ok) throw new Error('Forecast fetch failed');
+                const forecastData = await forecastResponse.json();
+                
+                // Current conditions (first period)
+                const current = forecastData.properties.periods[0];
+                document.getElementById('temperature').textContent = current.temperature + '°' + current.temperatureUnit;
+                document.getElementById('conditions').textContent = current.shortForecast;
+                document.getElementById('weather-icon').textContent = getWeatherIcon(current.shortForecast);
+                
+                // Forecast list
+                const forecastList = document.getElementById('forecast');
+                forecastList.innerHTML = '';
+                forecastData.properties.periods.slice(0, 7).forEach(period => {
+                    const item = document.createElement('div');
+                    item.className = 'forecast-item';
+                    item.innerHTML = `
+                        <div class="forecast-time">${period.name}</div>
+                        <div class="forecast-icon">${getWeatherIcon(period.shortForecast)}</div>
+                        <div class="forecast-temp">${period.temperature}°${period.temperatureUnit}</div>
+                        <div class="forecast-desc">${period.shortForecast}</div>
+                    `;
+                    forecastList.appendChild(item);
+                });
+            } catch (error) {
+                document.getElementById('temperature').textContent = 'N/A';
+                document.getElementById('conditions').textContent = 'Weather unavailable';
+                document.getElementById('weather-icon').textContent = '○';
+                document.getElementById('forecast').innerHTML = '<div class="error">Unable to load forecast. Check location settings.</div>';
+            }
+        }
+
+        // Generate calendar
+        function generateCalendar() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            
+            document.getElementById('month-year').textContent = 
+                new Date(year, month, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = now.getDate();
+            
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+            
+            // Day headers
+            ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day-header';
+                header.textContent = day;
+                grid.appendChild(header);
+            });
+            
+            // Empty cells before first day
+            for (let i = 0; i < firstDay; i++) {
+                const empty = document.createElement('div');
+                empty.className = 'calendar-day empty';
+                grid.appendChild(empty);
+            }
+            
+            // Days of month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayCell = document.createElement('div');
+                dayCell.className = 'calendar-day';
+                if (day === today) {
+                    dayCell.classList.add('today');
+                }
+                dayCell.textContent = day;
+                grid.appendChild(dayCell);
+            }
+        }
+
+        // Dashboard navigation
+        function showDashboard(index) {
+            if (index < 0) index = 0;
+            if (index >= totalDashboards) index = totalDashboards - 1;
+            
+            document.querySelectorAll('.dashboard').forEach((dash, i) => {
+                dash.classList.toggle('active', i === index);
+            });
+            
+            document.querySelectorAll('.indicator').forEach((ind, i) => {
+                ind.classList.toggle('active', i === index);
+            });
+            
+            currentDashboard = index;
+        }
+
+        // Touch/swipe handling
+        function handleTouchStart(e) {
+            touchStartX = e.changedTouches[0].screenX;
+        }
+
+        function handleTouchEnd(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+            
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    // Swipe left - next dashboard
+                    showDashboard(currentDashboard + 1);
+                } else {
+                    // Swipe right - previous dashboard
+                    showDashboard(currentDashboard - 1);
+                }
+            }
+        }
+
+        // Keyboard navigation
+        function handleKeyboard(e) {
+            if (e.key === 'ArrowLeft') {
+                showDashboard(currentDashboard - 1);
+            } else if (e.key === 'ArrowRight') {
+                showDashboard(currentDashboard + 1);
+            }
+        }
+
+        // Click indicators
+        document.querySelectorAll('.indicator').forEach(ind => {
+            ind.addEventListener('click', () => {
+                showDashboard(parseInt(ind.dataset.index));
+            });
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateTime();
+            setInterval(updateTime, 60000); // Update every minute
+            
+            fetchWeather();
+            setInterval(fetchWeather, 1800000); // Update every 30 minutes
+            
+            generateCalendar();
+            
+            // Event listeners
+            document.addEventListener('touchstart', handleTouchStart);
+            document.addEventListener('touchend', handleTouchEnd);
+            document.addEventListener('keydown', handleKeyboard);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator - Kindle App</title>
+    <style>
+        :root {
+            --background-color: #ffffff;
+            --text-color: #000000;
+            --border-color: #000000;
+            --muted-color: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 24px;
+        }
+
+        .back-link {
+            text-decoration: none;
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .back-link:hover {
+            background-color: var(--text-color);
+            color: var(--background-color);
+        }
+
+        .calculator-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            max-width: 400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .calculator {
+            width: 100%;
+            border: 2px solid var(--border-color);
+            padding: 20px;
+        }
+
+        .display {
+            width: 100%;
+            padding: 20px;
+            border: 2px solid var(--border-color);
+            font-size: 32px;
+            text-align: right;
+            margin-bottom: 20px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-weight: bold;
+            min-height: 80px;
+            overflow-x: auto;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 20px;
+            border: 2px solid var(--border-color);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            min-height: 60px;
+        }
+
+        .btn:hover {
+            background-color: var(--text-color);
+            color: var(--background-color);
+        }
+
+        .btn.operator {
+            background-color: var(--text-color);
+            color: var(--background-color);
+        }
+
+        .btn.operator:hover {
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .btn.wide {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 640px) {
+            .display {
+                font-size: 24px;
+                padding: 15px;
+                min-height: 60px;
+            }
+            
+            .btn {
+                padding: 15px;
+                font-size: 18px;
+                min-height: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Calculator</h1>
+        <a href="../../index.html" class="back-link">← Dashboard</a>
+    </div>
+
+    <div class="calculator-container">
+        <div class="calculator">
+            <div class="display" id="display">0</div>
+            <div class="buttons">
+                <button class="btn" onclick="clearDisplay()">C</button>
+                <button class="btn" onclick="deleteChar()">⌫</button>
+                <button class="btn operator" onclick="appendOperator('/')">/</button>
+                <button class="btn operator" onclick="appendOperator('*')">×</button>
+                
+                <button class="btn" onclick="appendNumber('7')">7</button>
+                <button class="btn" onclick="appendNumber('8')">8</button>
+                <button class="btn" onclick="appendNumber('9')">9</button>
+                <button class="btn operator" onclick="appendOperator('-')">-</button>
+                
+                <button class="btn" onclick="appendNumber('4')">4</button>
+                <button class="btn" onclick="appendNumber('5')">5</button>
+                <button class="btn" onclick="appendNumber('6')">6</button>
+                <button class="btn operator" onclick="appendOperator('+')">+</button>
+                
+                <button class="btn" onclick="appendNumber('1')">1</button>
+                <button class="btn" onclick="appendNumber('2')">2</button>
+                <button class="btn" onclick="appendNumber('3')">3</button>
+                <button class="btn operator" onclick="calculate()" style="grid-row: span 2;">=</button>
+                
+                <button class="btn wide" onclick="appendNumber('0')">0</button>
+                <button class="btn" onclick="appendNumber('.')">.</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../settings.js"></script>
+    <script>
+        let currentValue = '0';
+        let previousValue = null;
+        let operation = null;
+        let shouldResetDisplay = false;
+
+        const display = document.getElementById('display');
+
+        function updateDisplay() {
+            display.textContent = currentValue;
+        }
+
+        function clearDisplay() {
+            currentValue = '0';
+            previousValue = null;
+            operation = null;
+            shouldResetDisplay = false;
+            updateDisplay();
+        }
+
+        function deleteChar() {
+            if (currentValue.length > 1) {
+                currentValue = currentValue.slice(0, -1);
+            } else {
+                currentValue = '0';
+            }
+            updateDisplay();
+        }
+
+        function appendNumber(num) {
+            if (shouldResetDisplay) {
+                currentValue = num;
+                shouldResetDisplay = false;
+            } else {
+                if (currentValue === '0' && num !== '.') {
+                    currentValue = num;
+                } else if (num === '.' && currentValue.includes('.')) {
+                    // Don't add multiple decimal points
+                    return;
+                } else {
+                    currentValue += num;
+                }
+            }
+            updateDisplay();
+        }
+
+        function appendOperator(op) {
+            if (operation !== null && !shouldResetDisplay) {
+                calculate();
+            }
+            previousValue = currentValue;
+            operation = op;
+            shouldResetDisplay = true;
+        }
+
+        function calculate() {
+            if (operation === null || previousValue === null) {
+                return;
+            }
+
+            const prev = parseFloat(previousValue);
+            const current = parseFloat(currentValue);
+            let result;
+
+            switch (operation) {
+                case '+':
+                    result = prev + current;
+                    break;
+                case '-':
+                    result = prev - current;
+                    break;
+                case '*':
+                    result = prev * current;
+                    break;
+                case '/':
+                    if (current === 0) {
+                        currentValue = 'Error';
+                        previousValue = null;
+                        operation = null;
+                        updateDisplay();
+                        return;
+                    }
+                    result = prev / current;
+                    break;
+                default:
+                    return;
+            }
+
+            // Round to avoid floating point errors
+            result = Math.round(result * 100000000) / 100000000;
+            currentValue = result.toString();
+            previousValue = null;
+            operation = null;
+            shouldResetDisplay = true;
+            updateDisplay();
+        }
+
+        // Apply theme
+        document.addEventListener('DOMContentLoaded', () => {
+            settingsManager.applyTheme();
+        });
+
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') {
+                appendNumber(e.key);
+            } else if (e.key === '.') {
+                appendNumber('.');
+            } else if (e.key === '+' || e.key === '-' || e.key === '*' || e.key === '/') {
+                appendOperator(e.key);
+            } else if (e.key === 'Enter' || e.key === '=') {
+                calculate();
+            } else if (e.key === 'Escape') {
+                clearDisplay();
+            } else if (e.key === 'Backspace') {
+                deleteChar();
+            }
+        });
+    </script>
+</body>
+</html>

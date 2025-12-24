@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Kindle App</title>
+    <style>
+        :root {
+            --background-color: #ffffff;
+            --text-color: #000000;
+            --border-color: #000000;
+            --muted-color: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 24px;
+        }
+
+        .back-link {
+            text-decoration: none;
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .back-link:hover {
+            background-color: var(--text-color);
+            color: var(--background-color);
+        }
+
+        .settings-section {
+            margin-bottom: 30px;
+            border: 2px solid var(--border-color);
+            padding: 20px;
+        }
+
+        .settings-section h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .setting-item {
+            margin-bottom: 20px;
+        }
+
+        .setting-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .setting-label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .setting-description {
+            font-size: 14px;
+            color: var(--muted-color);
+            margin-bottom: 10px;
+        }
+
+        select, input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--border-color);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-size: 16px;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+        }
+
+        .radio-option input[type="radio"] {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+        }
+
+        .radio-option:hover {
+            background-color: var(--text-color);
+            color: var(--background-color);
+        }
+
+        .panel-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .panel-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+        }
+
+        .panel-item.home {
+            background-color: var(--muted-color);
+            color: var(--background-color);
+        }
+
+        .panel-info {
+            flex: 1;
+        }
+
+        .panel-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .panel-type {
+            font-size: 14px;
+            color: var(--muted-color);
+        }
+
+        .panel-item.home .panel-type {
+            color: var(--background-color);
+            opacity: 0.8;
+        }
+
+        .panel-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .panel-btn {
+            padding: 8px 12px;
+            border: 2px solid var(--border-color);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .panel-btn:hover:not(:disabled) {
+            background-color: var(--text-color);
+            color: var(--background-color);
+        }
+
+        .panel-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            background-color: var(--text-color);
+            color: var(--background-color);
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .save-btn:hover {
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .save-status {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            color: var(--muted-color);
+        }
+
+        .location-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .location-input {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .location-input label {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Settings</h1>
+        <a href="../../index.html" class="back-link">← Dashboard</a>
+    </div>
+
+    <div class="settings-section">
+        <h2>Appearance</h2>
+        <div class="setting-item">
+            <label class="setting-label">Dark Mode</label>
+            <div class="setting-description">Choose when to use dark mode</div>
+            <div class="radio-group">
+                <label class="radio-option">
+                    <input type="radio" name="darkMode" value="off">
+                    <span>Off (Light mode)</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="darkMode" value="on">
+                    <span>On (Dark mode)</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="darkMode" value="time-based">
+                    <span>Time-based (Dark 8 PM - 6 AM)</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-section">
+        <h2>Time & Date</h2>
+        <div class="setting-item">
+            <label class="setting-label">Time Format</label>
+            <div class="setting-description">Choose 12-hour or 24-hour format</div>
+            <div class="radio-group">
+                <label class="radio-option">
+                    <input type="radio" name="timeFormat" value="12hr">
+                    <span>12-hour (e.g., 2:30 PM)</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="timeFormat" value="24hr">
+                    <span>24-hour (e.g., 14:30)</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-section">
+        <h2>Weather</h2>
+        <div class="setting-item">
+            <label class="setting-label">Location</label>
+            <div class="setting-description">Enter latitude and longitude for weather</div>
+            <div class="location-inputs">
+                <div class="location-input">
+                    <label>Latitude</label>
+                    <input type="number" id="weather-lat" step="0.0001" placeholder="40.7128">
+                </div>
+                <div class="location-input">
+                    <label>Longitude</label>
+                    <input type="number" id="weather-lon" step="0.0001" placeholder="-74.0060">
+                </div>
+            </div>
+            <input type="text" id="weather-name" placeholder="Location name (e.g., New York, NY)">
+        </div>
+    </div>
+
+    <div class="settings-section">
+        <h2>Panels</h2>
+        <div class="setting-item">
+            <label class="setting-label">Manage Dashboard Panels</label>
+            <div class="setting-description">Add, remove, or rearrange panels (Home panel cannot be changed)</div>
+            <div class="panel-list" id="panel-list"></div>
+        </div>
+    </div>
+
+    <button class="save-btn" id="save-btn">Save Settings</button>
+    <div class="save-status" id="save-status"></div>
+
+    <script src="../../settings.js"></script>
+    <script>
+        // Load current settings
+        function loadSettings() {
+            const settings = settingsManager.settings;
+            
+            // Dark mode
+            const darkModeRadios = document.querySelectorAll('input[name="darkMode"]');
+            darkModeRadios.forEach(radio => {
+                if (radio.value === settings.darkMode) {
+                    radio.checked = true;
+                }
+            });
+            
+            // Time format
+            const timeFormatRadios = document.querySelectorAll('input[name="timeFormat"]');
+            timeFormatRadios.forEach(radio => {
+                if (radio.value === settings.timeFormat) {
+                    radio.checked = true;
+                }
+            });
+            
+            // Weather location
+            document.getElementById('weather-lat').value = settings.weatherLocation.lat;
+            document.getElementById('weather-lon').value = settings.weatherLocation.lon;
+            document.getElementById('weather-name').value = settings.weatherLocation.name;
+            
+            // Load panels
+            renderPanels();
+            
+            // Apply theme
+            settingsManager.applyTheme();
+        }
+
+        // Render panel list
+        function renderPanels() {
+            const panelList = document.getElementById('panel-list');
+            panelList.innerHTML = '';
+            
+            const panels = settingsManager.settings.panels;
+            panels.sort((a, b) => a.order - b.order);
+            
+            panels.forEach((panel, index) => {
+                const panelDiv = document.createElement('div');
+                panelDiv.className = 'panel-item' + (panel.type === 'home' ? ' home' : '');
+                panelDiv.innerHTML = `
+                    <div class="panel-info">
+                        <div class="panel-name">${getPanelName(panel.id)}</div>
+                        <div class="panel-type">${panel.type === 'home' ? 'Home (Fixed)' : 'Panel'}</div>
+                    </div>
+                    <div class="panel-controls">
+                        <button class="panel-btn" onclick="movePanelUp(${index})" ${index === 0 || panel.type === 'home' ? 'disabled' : ''}>↑</button>
+                        <button class="panel-btn" onclick="movePanelDown(${index})" ${index === panels.length - 1 || panel.type === 'home' ? 'disabled' : ''}>↓</button>
+                        <button class="panel-btn" onclick="togglePanel(${index})" ${panel.removable ? '' : 'disabled'}>${panel.enabled ? 'Remove' : 'Add'}</button>
+                    </div>
+                `;
+                panelList.appendChild(panelDiv);
+            });
+        }
+
+        function getPanelName(id) {
+            const names = {
+                'dashboard-main': 'Home',
+                'dashboard-weather': 'Weather Forecast',
+                'dashboard-calendar': 'Calendar',
+                'dashboard-apps': 'Apps'
+            };
+            return names[id] || id;
+        }
+
+        function movePanelUp(index) {
+            const panels = settingsManager.settings.panels;
+            if (index > 0 && panels[index].type !== 'home') {
+                // Swap with previous
+                const temp = panels[index].order;
+                panels[index].order = panels[index - 1].order;
+                panels[index - 1].order = temp;
+                
+                settingsManager.updatePanels(panels);
+                renderPanels();
+            }
+        }
+
+        function movePanelDown(index) {
+            const panels = settingsManager.settings.panels;
+            if (index < panels.length - 1 && panels[index].type !== 'home') {
+                // Swap with next
+                const temp = panels[index].order;
+                panels[index].order = panels[index + 1].order;
+                panels[index + 1].order = temp;
+                
+                settingsManager.updatePanels(panels);
+                renderPanels();
+            }
+        }
+
+        function togglePanel(index) {
+            const panels = settingsManager.settings.panels;
+            if (panels[index].removable) {
+                panels[index].enabled = !panels[index].enabled;
+                settingsManager.updatePanels(panels);
+                renderPanels();
+            }
+        }
+
+        // Save settings
+        document.getElementById('save-btn').addEventListener('click', () => {
+            const status = document.getElementById('save-status');
+            
+            try {
+                // Get dark mode
+                const darkMode = document.querySelector('input[name="darkMode"]:checked').value;
+                settingsManager.setSetting('darkMode', darkMode);
+                
+                // Get time format
+                const timeFormat = document.querySelector('input[name="timeFormat"]:checked').value;
+                settingsManager.setSetting('timeFormat', timeFormat);
+                
+                // Get weather location
+                const weatherLocation = {
+                    lat: parseFloat(document.getElementById('weather-lat').value),
+                    lon: parseFloat(document.getElementById('weather-lon').value),
+                    name: document.getElementById('weather-name').value
+                };
+                settingsManager.setSetting('weatherLocation', weatherLocation);
+                
+                // Apply theme immediately
+                settingsManager.applyTheme();
+                
+                status.textContent = 'Settings saved successfully!';
+                status.style.color = 'var(--text-color)';
+                
+                setTimeout(() => {
+                    status.textContent = '';
+                }, 3000);
+            } catch (error) {
+                status.textContent = 'Error saving settings: ' + error.message;
+                status.style.color = '#000000';
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', loadSettings);
+    </script>
+</body>
+</html>
