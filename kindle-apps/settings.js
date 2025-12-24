@@ -1,6 +1,10 @@
 // Settings management for Kindle Dashboard
 const SETTINGS_KEY = 'kindle-dashboard-settings';
 
+// Pattern opacity constants
+const PATTERN_OPACITY_DARK = 0.12;
+const PATTERN_OPACITY_LIGHT = 0.08;
+
 // Default settings
 const DEFAULT_SETTINGS = {
     darkMode: 'off', // 'off', 'on', or 'time-based'
@@ -111,13 +115,9 @@ class SettingsManager {
         body.classList.add(`bg-${pattern}`);
         
         // Set pattern colors based on theme for all patterns
-        if (isDark) {
-            // Dark theme pattern colors
-            document.documentElement.style.setProperty('--pattern-color', 'rgba(238, 238, 238, 0.12)');
-        } else {
-            // Light theme pattern colors
-            document.documentElement.style.setProperty('--pattern-color', 'rgba(0, 0, 0, 0.08)');
-        }
+        const opacity = isDark ? PATTERN_OPACITY_DARK : PATTERN_OPACITY_LIGHT;
+        const baseColor = isDark ? '238, 238, 238' : '0, 0, 0';
+        document.documentElement.style.setProperty('--pattern-color', `rgba(${baseColor}, ${opacity})`);
     }
 
     resetToDefaults() {

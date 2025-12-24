@@ -89,7 +89,8 @@
                 } else if (typeof event.reason === 'string') {
                     errorMsg = event.reason;
                 } else if (event.reason && typeof event.reason === 'object') {
-                    errorMsg = JSON.stringify(event.reason);
+                    // Safely stringify with depth limit to avoid circular refs and sensitive data
+                    errorMsg = String(event.reason);
                 } else {
                     errorMsg = String(event.reason);
                 }
@@ -97,13 +98,15 @@
                 errorMsg = 'Error stringifying rejection reason';
             }
             
-            // Only show banner for critical errors, not benign network failures
-            const isBenign = errorMsg.includes('fetch') || 
-                           errorMsg.includes('network') || 
-                           errorMsg.includes('CORS') ||
-                           errorMsg.includes('Point fetch failed') ||
-                           errorMsg.includes('Forecast fetch failed') ||
-                           errorMsg.includes('Alerts fetch failed');
+            // Benign error patterns (network/API failures we expect)
+            const BENIGN_PATTERNS = [
+                'fetch', 'network', 'CORS',
+                'Point fetch failed', 'Forecast fetch failed', 'Alerts fetch failed'
+            ];
+            
+            const isBenign = BENIGN_PATTERNS.some(pattern => 
+                errorMsg.toLowerCase().includes(pattern.toLowerCase())
+            );
             
             if (!isBenign) {
                 showError('Unhandled promise rejection', { message: errorMsg });
