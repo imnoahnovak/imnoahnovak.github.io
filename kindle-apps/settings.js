@@ -88,11 +88,14 @@ class SettingsManager {
             document.documentElement.style.setProperty('--background-color', '#222222');
             document.documentElement.style.setProperty('--text-color', '#eeeeee');
             document.documentElement.style.setProperty('--muted-color', '#aaaaaa');
+            document.documentElement.style.setProperty('--border-color', '#eeeeee');
         } else {
             document.documentElement.style.setProperty('--background-color', '#ffffff');
             document.documentElement.style.setProperty('--text-color', '#000000');
             document.documentElement.style.setProperty('--muted-color', '#333333');
+            document.documentElement.style.setProperty('--border-color', '#000000');
         }
+        // Apply background pattern after theme colors are set
         this.applyBackgroundPattern();
     }
 
@@ -107,13 +110,13 @@ class SettingsManager {
         // Apply new pattern
         body.classList.add(`bg-${pattern}`);
         
-        // Set pattern colors based on theme
-        if (pattern === 'dotted') {
-            const dotColor = isDark ? 'rgba(238, 238, 238, 0.15)' : 'rgba(0, 0, 0, 0.08)';
-            document.documentElement.style.setProperty('--pattern-color', dotColor);
-        } else if (pattern === 'striped') {
-            const stripeColor = isDark ? 'rgba(238, 238, 238, 0.08)' : 'rgba(0, 0, 0, 0.05)';
-            document.documentElement.style.setProperty('--pattern-color', stripeColor);
+        // Set pattern colors based on theme for all patterns
+        if (isDark) {
+            // Dark theme pattern colors
+            document.documentElement.style.setProperty('--pattern-color', 'rgba(238, 238, 238, 0.12)');
+        } else {
+            // Light theme pattern colors
+            document.documentElement.style.setProperty('--pattern-color', 'rgba(0, 0, 0, 0.08)');
         }
     }
 

@@ -383,6 +383,9 @@
                     input.addEventListener('input', markAsChanged);
                 }
             });
+            
+            // Add listeners to panel controls (they modify settings but aren't inputs)
+            // These are already saving directly, so we don't need to track them
         }
         
         // Warn before leaving with unsaved changes
@@ -448,6 +451,7 @@
                 
                 settingsManager.updatePanels(panels);
                 renderPanels();
+                // Don't mark as changed - this saves directly
             }
         }
 
@@ -461,6 +465,7 @@
                 
                 settingsManager.updatePanels(panels);
                 renderPanels();
+                // Don't mark as changed - this saves directly
             }
         }
 
@@ -470,6 +475,7 @@
                 panels[index].enabled = !panels[index].enabled;
                 settingsManager.updatePanels(panels);
                 renderPanels();
+                // Don't mark as changed - this saves directly
             }
         }
 

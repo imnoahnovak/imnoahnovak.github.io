@@ -38,9 +38,24 @@
     <script src="./settings.js"></script>
     <script src="./icons.js"></script>
     <script>
+        // Error deduplication tracking
+        let lastErrorMessage = '';
+        let lastErrorTime = 0;
+        const ERROR_THROTTLE_MS = 5000; // Don't show same error within 5 seconds
+
         // Error reporting
         function showError(message, error) {
             console.error('Dashboard Error:', message, error);
+            
+            // Dedupe/throttle errors
+            const errorKey = message + (error ? error.toString() : '');
+            const now = Date.now();
+            if (errorKey === lastErrorMessage && (now - lastErrorTime) < ERROR_THROTTLE_MS) {
+                return; // Skip duplicate error
+            }
+            lastErrorMessage = errorKey;
+            lastErrorTime = now;
+            
             const banner = document.getElementById('error-banner');
             const messageEl = document.getElementById('error-message');
             if (banner && messageEl) {
@@ -49,13 +64,50 @@
             }
         }
 
+        // Dismiss error banner on click
+        document.addEventListener('DOMContentLoaded', () => {
+            const banner = document.getElementById('error-banner');
+            if (banner) {
+                banner.addEventListener('click', () => {
+                    banner.classList.remove('visible');
+                });
+                banner.style.cursor = 'pointer';
+            }
+        });
+
         // Global error handlers
         window.addEventListener('error', (event) => {
             showError('Unexpected error', event.error || new Error(event.message));
         });
 
         window.addEventListener('unhandledrejection', (event) => {
-            showError('Unhandled promise rejection', new Error(event.reason));
+            // Safely stringify the rejection reason
+            let errorMsg = 'Unknown error';
+            try {
+                if (event.reason instanceof Error) {
+                    errorMsg = event.reason.message;
+                } else if (typeof event.reason === 'string') {
+                    errorMsg = event.reason;
+                } else if (event.reason && typeof event.reason === 'object') {
+                    errorMsg = JSON.stringify(event.reason);
+                } else {
+                    errorMsg = String(event.reason);
+                }
+            } catch (e) {
+                errorMsg = 'Error stringifying rejection reason';
+            }
+            
+            // Only show banner for critical errors, not benign network failures
+            const isBenign = errorMsg.includes('fetch') || 
+                           errorMsg.includes('network') || 
+                           errorMsg.includes('CORS') ||
+                           errorMsg.includes('Point fetch failed') ||
+                           errorMsg.includes('Forecast fetch failed') ||
+                           errorMsg.includes('Alerts fetch failed');
+            
+            if (!isBenign) {
+                showError('Unhandled promise rejection', { message: errorMsg });
+            }
         });
 
         // Safe icon creation with fallback
@@ -343,7 +395,7 @@
                 const forecastList = document.getElementById('forecast');
                 if (forecastList) {
                     forecastList.innerHTML = '';
-                    forecastData.properties.periods.slice(0, 7).forEach(period => {
+                    forecastData.properties.periods.slice(0, 5).forEach(period => {
                         const item = document.createElement('div');
                         item.className = 'forecast-item';
                         
@@ -440,6 +492,16 @@
             });
             
             currentDashboard = index;
+            
+            // Show/hide drawer button based on current dashboard
+            const drawerButton = document.getElementById('drawer-button');
+            if (drawerButton) {
+                if (index === 0) {
+                    drawerButton.style.display = 'block';
+                } else {
+                    drawerButton.style.display = 'none';
+                }
+            }
         }
 
         // App drawer controls
