@@ -64,6 +64,7 @@
                 render: () => `
                     <div class="dashboard-content">
                         <h2 class="dashboard-title">Weather Forecast</h2>
+                        <div id="weather-alerts" class="weather-alerts"></div>
                         <div id="forecast" class="forecast-list">
                             <div class="loading">Loading forecast...</div>
                         </div>
@@ -85,41 +86,19 @@
                     </div>
                     <div class="nav-hint">← Swipe to navigate →</div>
                 `
-            },
-            'dashboard-apps': {
-                title: 'Quick Links',
-                render: () => `
-                    <div class="dashboard-content">
-                        <h2 class="dashboard-title">Quick Links</h2>
-                        <div class="apps-list">
-                            <a href="./apps/notes/index.html" class="app-item app-link-item">
-                                <div class="app-icon" id="icon-notes"></div>
-                                <div>
-                                    <div class="app-name">Notes</div>
-                                    <div class="app-desc">Simple notepad with save</div>
-                                </div>
-                            </a>
-                            <a href="./apps/tasks/index.html" class="app-item app-link-item">
-                                <div class="app-icon" id="icon-tasks"></div>
-                                <div>
-                                    <div class="app-name">Tasks</div>
-                                    <div class="app-desc">To-do list manager</div>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="app-note">Click "Apps" button to see all apps</div>
-                    </div>
-                    <div class="nav-hint">← Swipe to navigate →</div>
-                `
             }
         };
 
         // App list for drawer
         const apps = [
-            { name: 'Notes', desc: 'Simple notepad with save', url: './apps/notes/index.html', icon: 'notes' },
+            { name: 'Notes', desc: 'Multiple notes with CRUD', url: './apps/notes/index.html', icon: 'notes' },
             { name: 'Tasks', desc: 'To-do list manager', url: './apps/tasks/index.html', icon: 'tasks' },
-            { name: 'Timer', desc: 'Countdown timer', url: './apps/timer/index.html', icon: 'timer' },
-            { name: 'Calculator', desc: 'Basic calculator', url: './apps/calculator/index.html', icon: 'calculator' },
+            { name: 'Timer', desc: 'Multiple countdown timers', url: './apps/timer/index.html', icon: 'timer' },
+            { name: 'Calculator', desc: 'Calculator + unit converter', url: './apps/calculator/index.html', icon: 'calculator' },
+            { name: 'RSS Reader', desc: 'Follow RSS/Atom feeds', url: './apps/rss/index.html', icon: 'notes' },
+            { name: 'Breathing', desc: 'Breathing exercises', url: './apps/breathing/index.html', icon: 'weather' },
+            { name: 'Contacts', desc: 'Local contact book', url: './apps/contacts/index.html', icon: 'tasks' },
+            { name: 'Reading Log', desc: 'Track your reading', url: './apps/reading-log/index.html', icon: 'notes' },
             { name: 'Settings', desc: 'Configure dashboard', url: './apps/settings/index.html', icon: 'settings' }
         ];
 
@@ -162,20 +141,6 @@
             updateTime();
             fetchWeather();
             generateCalendar();
-            
-            // Add icons to quick links panel if it exists
-            setTimeout(() => {
-                const notesIconEl = document.getElementById('icon-notes');
-                const tasksIconEl = document.getElementById('icon-tasks');
-                if (notesIconEl) {
-                    const notesIcon = createIcon('ui', 'notes');
-                    notesIconEl.appendChild(notesIcon);
-                }
-                if (tasksIconEl) {
-                    const tasksIcon = createIcon('ui', 'tasks');
-                    tasksIconEl.appendChild(tasksIcon);
-                }
-            }, 100);
         }
 
         // Initialize app drawer
@@ -231,6 +196,57 @@
             }
         }
 
+        // Fetch weather alerts
+        async function fetchWeatherAlerts(zoneId) {
+            const alertsEl = document.getElementById('weather-alerts');
+            if (!alertsEl) return;
+
+            try {
+                const location = settingsManager.getSetting('weatherLocation');
+                const lat = location.lat;
+                const lon = location.lon;
+                
+                // Use point-based alerts if zone not available
+                const alertsUrl = `https://api.weather.gov/alerts/active?point=${lat},${lon}`;
+                const response = await fetch(alertsUrl);
+                
+                if (!response.ok) throw new Error('Alerts fetch failed');
+                
+                const data = await response.json();
+                const alerts = data.features || [];
+                
+                // Filter for severe weather
+                const severeAlerts = alerts.filter(alert => {
+                    const severity = alert.properties.severity;
+                    return severity === 'Severe' || severity === 'Extreme';
+                });
+                
+                if (severeAlerts.length === 0) {
+                    alertsEl.innerHTML = '';
+                    return;
+                }
+                
+                // Display alerts
+                alertsEl.innerHTML = '';
+                severeAlerts.forEach(alert => {
+                    const props = alert.properties;
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'weather-alert';
+                    alertDiv.innerHTML = `
+                        <div class="alert-header">
+                            <span class="alert-severity">${props.severity}</span>
+                            <span class="alert-event">${props.event}</span>
+                        </div>
+                        <div class="alert-headline">${props.headline || props.description}</div>
+                    `;
+                    alertsEl.appendChild(alertDiv);
+                });
+            } catch (error) {
+                console.error('Alerts fetch error:', error);
+                if (alertsEl) alertsEl.innerHTML = '';
+            }
+        }
+
         // Fetch weather from weather.gov API
         async function fetchWeather() {
             try {
@@ -242,6 +258,9 @@
                 const pointResponse = await fetch(`https://api.weather.gov/points/${lat},${lon}`);
                 if (!pointResponse.ok) throw new Error('Point fetch failed');
                 const pointData = await pointResponse.json();
+                
+                // Fetch weather alerts
+                fetchWeatherAlerts(pointData.properties.zone || null);
                 
                 // Get forecast
                 const forecastResponse = await fetch(pointData.properties.forecast);

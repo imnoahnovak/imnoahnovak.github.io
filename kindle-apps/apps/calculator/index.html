@@ -55,6 +55,33 @@
             color: var(--background-color);
         }
 
+        .mode-switcher {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid var(--border-color);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .mode-btn.active {
+            background-color: var(--text-color);
+            color: var(--background-color);
+        }
+
+        .mode-btn:hover {
+            background-color: var(--text-color);
+            color: var(--background-color);
+        }
+
         .calculator-container {
             flex: 1;
             display: flex;
@@ -63,6 +90,12 @@
             align-items: center;
             max-width: 400px;
             margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Calculator Mode */
+        .calculator-mode {
+            display: block;
             width: 100%;
         }
 
@@ -122,6 +155,83 @@
             grid-column: span 2;
         }
 
+        /* Unit Conversion Mode */
+        .converter-mode {
+            display: none;
+            width: 100%;
+        }
+
+        .converter {
+            width: 100%;
+            border: 2px solid var(--border-color);
+            padding: 20px;
+        }
+
+        .unit-type-selector {
+            margin-bottom: 20px;
+        }
+
+        .unit-type-selector select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .conversion-row {
+            margin-bottom: 20px;
+        }
+
+        .conversion-row label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .conversion-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .conversion-input-group input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .conversion-input-group select {
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-size: 16px;
+        }
+
+        .swap-btn {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .swap-btn:hover {
+            background-color: var(--text-color);
+            color: var(--background-color);
+        }
+
         @media (max-width: 640px) {
             .display {
                 font-size: 24px;
@@ -143,45 +253,168 @@
         <a href="../../index.html" class="back-link">← Dashboard</a>
     </div>
 
+    <div class="mode-switcher">
+        <button class="mode-btn active" id="calc-mode-btn">Calculator</button>
+        <button class="mode-btn" id="convert-mode-btn">Unit Converter</button>
+    </div>
+
     <div class="calculator-container">
-        <div class="calculator">
-            <div class="display" id="display">0</div>
-            <div class="buttons">
-                <button class="btn" onclick="clearDisplay()">C</button>
-                <button class="btn" onclick="deleteChar()">⌫</button>
-                <button class="btn operator" onclick="appendOperator('/')">/</button>
-                <button class="btn operator" onclick="appendOperator('*')">×</button>
-                
-                <button class="btn" onclick="appendNumber('7')">7</button>
-                <button class="btn" onclick="appendNumber('8')">8</button>
-                <button class="btn" onclick="appendNumber('9')">9</button>
-                <button class="btn operator" onclick="appendOperator('-')">-</button>
-                
-                <button class="btn" onclick="appendNumber('4')">4</button>
-                <button class="btn" onclick="appendNumber('5')">5</button>
-                <button class="btn" onclick="appendNumber('6')">6</button>
-                <button class="btn operator" onclick="appendOperator('+')">+</button>
-                
-                <button class="btn" onclick="appendNumber('1')">1</button>
-                <button class="btn" onclick="appendNumber('2')">2</button>
-                <button class="btn" onclick="appendNumber('3')">3</button>
-                <button class="btn operator" onclick="calculate()" style="grid-row: span 2;">=</button>
-                
-                <button class="btn wide" onclick="appendNumber('0')">0</button>
-                <button class="btn" onclick="appendNumber('.')">.</button>
+        <!-- Calculator Mode -->
+        <div class="calculator-mode" id="calculator-mode">
+            <div class="calculator">
+                <div class="display" id="display">0</div>
+                <div class="buttons">
+                    <button class="btn" onclick="clearDisplay()">C</button>
+                    <button class="btn" onclick="deleteChar()">⌫</button>
+                    <button class="btn operator" onclick="appendOperator('/')">/</button>
+                    <button class="btn operator" onclick="appendOperator('*')">×</button>
+                    
+                    <button class="btn" onclick="appendNumber('7')">7</button>
+                    <button class="btn" onclick="appendNumber('8')">8</button>
+                    <button class="btn" onclick="appendNumber('9')">9</button>
+                    <button class="btn operator" onclick="appendOperator('-')">-</button>
+                    
+                    <button class="btn" onclick="appendNumber('4')">4</button>
+                    <button class="btn" onclick="appendNumber('5')">5</button>
+                    <button class="btn" onclick="appendNumber('6')">6</button>
+                    <button class="btn operator" onclick="appendOperator('+')">+</button>
+                    
+                    <button class="btn" onclick="appendNumber('1')">1</button>
+                    <button class="btn" onclick="appendNumber('2')">2</button>
+                    <button class="btn" onclick="appendNumber('3')">3</button>
+                    <button class="btn operator" onclick="calculate()" style="grid-row: span 2;">=</button>
+                    
+                    <button class="btn wide" onclick="appendNumber('0')">0</button>
+                    <button class="btn" onclick="appendNumber('.')">.</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unit Converter Mode -->
+        <div class="converter-mode" id="converter-mode">
+            <div class="converter">
+                <div class="unit-type-selector">
+                    <select id="unit-type" onchange="changeUnitType()">
+                        <option value="length">Length</option>
+                        <option value="weight">Weight</option>
+                        <option value="temperature">Temperature</option>
+                        <option value="volume">Volume</option>
+                        <option value="area">Area</option>
+                        <option value="speed">Speed</option>
+                    </select>
+                </div>
+
+                <div class="conversion-row">
+                    <label>From</label>
+                    <div class="conversion-input-group">
+                        <input type="number" id="from-value" placeholder="0" oninput="convertUnits()">
+                        <select id="from-unit" onchange="convertUnits()"></select>
+                    </div>
+                </div>
+
+                <button class="swap-btn" onclick="swapUnits()">⇅ Swap Units</button>
+
+                <div class="conversion-row">
+                    <label>To</label>
+                    <div class="conversion-input-group">
+                        <input type="number" id="to-value" placeholder="0" readonly>
+                        <select id="to-unit" onchange="convertUnits()"></select>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="../../settings.js"></script>
     <script>
+        // Calculator State
         let currentValue = '0';
         let previousValue = null;
         let operation = null;
         let shouldResetDisplay = false;
-
         const display = document.getElementById('display');
 
+        // Unit Conversion Data
+        const units = {
+            length: {
+                meter: 1,
+                kilometer: 0.001,
+                centimeter: 100,
+                millimeter: 1000,
+                mile: 0.000621371,
+                yard: 1.09361,
+                foot: 3.28084,
+                inch: 39.3701
+            },
+            weight: {
+                kilogram: 1,
+                gram: 1000,
+                milligram: 1000000,
+                pound: 2.20462,
+                ounce: 35.274,
+                ton: 0.001
+            },
+            temperature: {
+                celsius: 1,
+                fahrenheit: 1,
+                kelvin: 1
+            },
+            volume: {
+                liter: 1,
+                milliliter: 1000,
+                gallon: 0.264172,
+                quart: 1.05669,
+                pint: 2.11338,
+                cup: 4.22675,
+                fluid_ounce: 33.814
+            },
+            area: {
+                square_meter: 1,
+                square_kilometer: 0.000001,
+                square_mile: 0.000000386102,
+                square_yard: 1.19599,
+                square_foot: 10.7639,
+                square_inch: 1550,
+                hectare: 0.0001,
+                acre: 0.000247105
+            },
+            speed: {
+                meter_per_second: 1,
+                kilometer_per_hour: 3.6,
+                mile_per_hour: 2.23694,
+                foot_per_second: 3.28084,
+                knot: 1.94384
+            }
+        };
+
+        const unitLabels = {
+            length: { meter: 'm', kilometer: 'km', centimeter: 'cm', millimeter: 'mm', mile: 'mi', yard: 'yd', foot: 'ft', inch: 'in' },
+            weight: { kilogram: 'kg', gram: 'g', milligram: 'mg', pound: 'lb', ounce: 'oz', ton: 't' },
+            temperature: { celsius: '°C', fahrenheit: '°F', kelvin: 'K' },
+            volume: { liter: 'L', milliliter: 'mL', gallon: 'gal', quart: 'qt', pint: 'pt', cup: 'cup', fluid_ounce: 'fl oz' },
+            area: { square_meter: 'm²', square_kilometer: 'km²', square_mile: 'mi²', square_yard: 'yd²', square_foot: 'ft²', square_inch: 'in²', hectare: 'ha', acre: 'ac' },
+            speed: { meter_per_second: 'm/s', kilometer_per_hour: 'km/h', mile_per_hour: 'mph', foot_per_second: 'ft/s', knot: 'kn' }
+        };
+
+        // Mode Switching
+        function switchMode(mode) {
+            if (mode === 'calculator') {
+                document.getElementById('calculator-mode').style.display = 'block';
+                document.getElementById('converter-mode').style.display = 'none';
+                document.getElementById('calc-mode-btn').classList.add('active');
+                document.getElementById('convert-mode-btn').classList.remove('active');
+            } else {
+                document.getElementById('calculator-mode').style.display = 'none';
+                document.getElementById('converter-mode').style.display = 'block';
+                document.getElementById('calc-mode-btn').classList.remove('active');
+                document.getElementById('convert-mode-btn').classList.add('active');
+            }
+        }
+
+        document.getElementById('calc-mode-btn').addEventListener('click', () => switchMode('calculator'));
+        document.getElementById('convert-mode-btn').addEventListener('click', () => switchMode('converter'));
+
+        // Calculator Functions
         function updateDisplay() {
             display.textContent = currentValue;
         }
@@ -211,7 +444,6 @@
                 if (currentValue === '0' && num !== '.') {
                     currentValue = num;
                 } else if (num === '.' && currentValue.includes('.')) {
-                    // Don't add multiple decimal points
                     return;
                 } else {
                     currentValue += num;
@@ -262,7 +494,6 @@
                     return;
             }
 
-            // Round to avoid floating point errors
             result = Math.round(result * 100000000) / 100000000;
             currentValue = result.toString();
             previousValue = null;
@@ -271,13 +502,97 @@
             updateDisplay();
         }
 
-        // Apply theme
-        document.addEventListener('DOMContentLoaded', () => {
-            settingsManager.applyTheme();
-        });
+        // Unit Converter Functions
+        function changeUnitType() {
+            const type = document.getElementById('unit-type').value;
+            const fromUnit = document.getElementById('from-unit');
+            const toUnit = document.getElementById('to-unit');
+            
+            fromUnit.innerHTML = '';
+            toUnit.innerHTML = '';
+            
+            const unitList = units[type];
+            const labels = unitLabels[type];
+            
+            for (const unit in unitList) {
+                const option1 = document.createElement('option');
+                option1.value = unit;
+                option1.textContent = labels[unit];
+                fromUnit.appendChild(option1);
+                
+                const option2 = document.createElement('option');
+                option2.value = unit;
+                option2.textContent = labels[unit];
+                toUnit.appendChild(option2);
+            }
+            
+            // Set different default units
+            if (toUnit.options.length > 1) {
+                toUnit.selectedIndex = 1;
+            }
+            
+            convertUnits();
+        }
 
-        // Keyboard support
+        function convertUnits() {
+            const type = document.getElementById('unit-type').value;
+            const fromValue = parseFloat(document.getElementById('from-value').value) || 0;
+            const fromUnit = document.getElementById('from-unit').value;
+            const toUnit = document.getElementById('to-unit').value;
+            
+            let result;
+            
+            if (type === 'temperature') {
+                result = convertTemperature(fromValue, fromUnit, toUnit);
+            } else {
+                const baseValue = fromValue / units[type][fromUnit];
+                result = baseValue * units[type][toUnit];
+            }
+            
+            document.getElementById('to-value').value = result.toFixed(6).replace(/\.?0+$/, '');
+        }
+
+        function convertTemperature(value, from, to) {
+            let celsius;
+            
+            // Convert to Celsius first
+            if (from === 'celsius') {
+                celsius = value;
+            } else if (from === 'fahrenheit') {
+                celsius = (value - 32) * 5/9;
+            } else if (from === 'kelvin') {
+                celsius = value - 273.15;
+            }
+            
+            // Convert from Celsius to target
+            if (to === 'celsius') {
+                return celsius;
+            } else if (to === 'fahrenheit') {
+                return celsius * 9/5 + 32;
+            } else if (to === 'kelvin') {
+                return celsius + 273.15;
+            }
+        }
+
+        function swapUnits() {
+            const fromUnit = document.getElementById('from-unit');
+            const toUnit = document.getElementById('to-unit');
+            const fromValue = document.getElementById('from-value');
+            const toValue = document.getElementById('to-value');
+            
+            const tempUnit = fromUnit.value;
+            fromUnit.value = toUnit.value;
+            toUnit.value = tempUnit;
+            
+            fromValue.value = toValue.value;
+            
+            convertUnits();
+        }
+
+        // Keyboard support for calculator
         document.addEventListener('keydown', (e) => {
+            if (document.getElementById('calculator-mode').style.display !== 'block') return;
+            
             if (e.key >= '0' && e.key <= '9') {
                 appendNumber(e.key);
             } else if (e.key === '.') {
@@ -291,6 +606,12 @@
             } else if (e.key === 'Backspace') {
                 deleteChar();
             }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            settingsManager.applyTheme();
+            changeUnitType();
         });
     </script>
 </body>
