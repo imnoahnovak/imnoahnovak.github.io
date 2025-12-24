@@ -214,7 +214,6 @@ body {
   text-decoration: none;
   color: var(--text-color);
   cursor: pointer;
-  transition: background-color 0.1s;
 }
 
 .app-link-item:hover,

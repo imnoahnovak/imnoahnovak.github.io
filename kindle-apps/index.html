@@ -144,7 +144,7 @@
                 
                 // Current conditions (first period)
                 const current = forecastData.properties.periods[0];
-                document.getElementById('temperature').textContent = current.temperature + '°F';
+                document.getElementById('temperature').textContent = current.temperature + '°' + current.temperatureUnit;
                 document.getElementById('conditions').textContent = current.shortForecast;
                 document.getElementById('weather-icon').textContent = getWeatherIcon(current.shortForecast);
                 

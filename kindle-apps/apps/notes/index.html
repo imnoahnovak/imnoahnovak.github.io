@@ -90,6 +90,7 @@
         const textarea = document.getElementById('notepad');
         const status = document.getElementById('status');
         const STORAGE_KEY = 'kindle-notes';
+        const AUTO_SAVE_DELAY = 2000; // milliseconds
         let saveTimeout;
 
         // Load saved notes
@@ -110,7 +111,7 @@
         textarea.addEventListener('input', () => {
             clearTimeout(saveTimeout);
             status.textContent = 'Saving...';
-            saveTimeout = setTimeout(saveNotes, 2000);
+            saveTimeout = setTimeout(saveNotes, AUTO_SAVE_DELAY);
         });
 
         // Load notes on page load
