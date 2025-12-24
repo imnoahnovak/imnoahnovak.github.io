@@ -130,6 +130,40 @@ body.bg-striped {
   overflow-y: auto;
 }
 
+.weather-alerts {
+  margin-bottom: 20px;
+}
+
+.weather-alert {
+  border: 3px solid var(--border-color);
+  padding: 15px;
+  margin-bottom: 15px;
+  background-color: var(--text-color);
+  color: var(--background-color);
+}
+
+.alert-header {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.alert-severity {
+  padding: 4px 8px;
+  border: 2px solid var(--background-color);
+}
+
+.alert-event {
+  flex: 1;
+}
+
+.alert-headline {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
 .forecast-item {
   border: 2px solid var(--border-color);
   padding: 15px;
