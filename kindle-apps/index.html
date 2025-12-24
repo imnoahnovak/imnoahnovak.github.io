@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="./style.css">
+    <title>Kindle Browser App Hub</title>
+</head>
+<body>
+    <main class="page">
+        <header class="hero">
+            <p class="eyebrow">Lightweight & Kindle-friendly</p>
+            <h1>App Hub for the Kindle experimental browser</h1>
+            <p class="lede">Use these fast-loading web apps without leaving your e-reader. They favor simple pages, minimal images, and easy navigation on e-ink screens.</p>
+            <div class="pill-list" aria-label="Browser tips">
+                <span class="pill">Use landscape mode for wider layouts</span>
+                <span class="pill">Turn off images to speed up loading</span>
+                <span class="pill">Bookmark this page for quick access</span>
+            </div>
+        </header>
+
+        <section class="panel">
+            <div class="panel-header">
+                <h2>Starter apps</h2>
+                <p>Each link opens in a new tab. They are chosen for quick load times and keyboard-friendly controls.</p>
+            </div>
+            <div class="apps-grid">
+                <article class="app-card">
+                    <div class="app-meta">
+                        <p class="app-tag">Notes</p>
+                        <h3>Plain Notepad</h3>
+                    </div>
+                    <p>Simple text editor that autosaves locally. Ideal for jotting ideas without heavy formatting.</p>
+                    <a class="app-link" href="https://litepad.io" target="_blank" rel="noreferrer">Launch</a>
+                </article>
+                <article class="app-card">
+                    <div class="app-meta">
+                        <p class="app-tag">Timers</p>
+                        <h3>Distraction-free Pomodoro</h3>
+                    </div>
+                    <p>Minimal timer with vibration-free alerts—perfect for focused reading or study sessions.</p>
+                    <a class="app-link" href="https://pomofocus.io" target="_blank" rel="noreferrer">Launch</a>
+                </article>
+                <article class="app-card">
+                    <div class="app-meta">
+                        <p class="app-tag">Vocabulary</p>
+                        <h3>Fast Dictionary</h3>
+                    </div>
+                    <p>Lookup words with a text-first layout. Works even on slow connections and small screens.</p>
+                    <a class="app-link" href="https://duckduckgo.com/?q=define+word" target="_blank" rel="noreferrer">Launch</a>
+                </article>
+                <article class="app-card">
+                    <div class="app-meta">
+                        <p class="app-tag">Reader</p>
+                        <h3>Minimal RSS</h3>
+                    </div>
+                    <p>Feed viewer with a narrow column for comfortable reading on e-ink.</p>
+                    <a class="app-link" href="https://feedbin.com/i/anon" target="_blank" rel="noreferrer">Launch</a>
+                </article>
+                <article class="app-card">
+                    <div class="app-meta">
+                        <p class="app-tag">Lists</p>
+                        <h3>Tasks & checklists</h3>
+                    </div>
+                    <p>Simple to-do list with keyboard shortcuts; no account required to start tracking tasks.</p>
+                    <a class="app-link" href="https://todoist.com/product/lite" target="_blank" rel="noreferrer">Launch</a>
+                </article>
+            </div>
+        </section>
+
+        <section class="panel tips">
+            <div class="panel-header">
+                <h2>Kindle-friendly setup tips</h2>
+                <p>Keep pages readable and responsive on e-ink.</p>
+            </div>
+            <ul class="tip-list">
+                <li><strong>Toggle grayscale:</strong> Dark mode can invert colors; if text looks faint, switch to light mode in the Kindle browser settings.</li>
+                <li><strong>Resize text:</strong> Increase font size in-browser for less ghosting and smoother scrolling.</li>
+                <li><strong>Full-screen view:</strong> Hide the toolbar for more space when typing in forms or notes.</li>
+                <li><strong>Bookmark apps:</strong> Long-press the address bar to add individual apps to your bookmarks for one-tap access.</li>
+                <li><strong>Offline awareness:</strong> These links require connectivity; avoid image-heavy pages to reduce load times.</li>
+            </ul>
+        </section>
+
+        <section class="panel">
+            <div class="panel-header">
+                <h2>Add your own apps</h2>
+                <p>Use this structure to extend the hub with more Kindle-friendly links.</p>
+            </div>
+            <ol class="steps">
+                <li>Duplicate an app card below and update the name, short description, and link.</li>
+                <li>Favor sites with simple HTML, minimal animations, and keyboard focus states.</li>
+                <li>Test on the Kindle browser—if it loads fast and scrolls smoothly, it belongs here.</li>
+            </ol>
+            <pre class="code-block" aria-label="HTML snippet">
+&lt;article class="app-card"&gt;
+  &lt;div class="app-meta"&gt;
+    &lt;p class="app-tag"&gt;Category&lt;/p&gt;
+    &lt;h3&gt;App name&lt;/h3&gt;
+  &lt;/div&gt;
+  &lt;p&gt;One-line description of why it works well on Kindle.&lt;/p&gt;
+  &lt;a class="app-link" href="https://example.com" target="_blank" rel="noreferrer"&gt;Launch&lt;/a&gt;
+&lt;/article&gt;
+            </pre>
+        </section>
+    </main>
+</body>
+</html>
