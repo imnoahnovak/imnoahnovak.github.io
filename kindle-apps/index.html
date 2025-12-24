@@ -7,6 +7,12 @@
     <title>Kindle Dashboard</title>
 </head>
 <body>
+    <!-- Error Banner -->
+    <div class="error-banner" id="error-banner">
+        <div class="error-banner-title">⚠ Error Occurred</div>
+        <div class="error-banner-message" id="error-message"></div>
+    </div>
+
     <div class="dashboard-container">
         <!-- Dashboards will be inserted here dynamically -->
         <div id="dashboards-wrapper"></div>
@@ -32,6 +38,58 @@
     <script src="./settings.js"></script>
     <script src="./icons.js"></script>
     <script>
+        // Error reporting
+        function showError(message, error) {
+            console.error('Dashboard Error:', message, error);
+            const banner = document.getElementById('error-banner');
+            const messageEl = document.getElementById('error-message');
+            if (banner && messageEl) {
+                messageEl.textContent = message + (error ? ': ' + error.message : '');
+                banner.classList.add('visible');
+            }
+        }
+
+        // Global error handlers
+        window.addEventListener('error', (event) => {
+            showError('Unexpected error', event.error || new Error(event.message));
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            showError('Unhandled promise rejection', new Error(event.reason));
+        });
+
+        // Safe icon creation with fallback
+        function safeCreateIcon(category, name, className = '') {
+            try {
+                if (typeof createIcon === 'function') {
+                    return createIcon(category, name, className);
+                }
+            } catch (e) {
+                console.warn('Icon creation failed:', e);
+            }
+            // Fallback: return empty div
+            const fallback = document.createElement('div');
+            fallback.className = `icon ${className}`;
+            fallback.textContent = '•';
+            return fallback;
+        }
+
+        // Safe weather icon getter with fallback
+        function safeGetWeatherIcon(condition) {
+            try {
+                if (typeof getWeatherIcon === 'function') {
+                    return getWeatherIcon(condition);
+                }
+            } catch (e) {
+                console.warn('Weather icon creation failed:', e);
+            }
+            // Fallback: return simple text
+            const fallback = document.createElement('div');
+            fallback.className = 'weather-icon';
+            fallback.textContent = '○';
+            return fallback;
+        }
+
         // Dashboard state
         let currentDashboard = 0;
         let totalDashboards = 0;
@@ -127,7 +185,7 @@
                 
                 // Use home icon for home panel, dot for others
                 if (panel.type === 'home') {
-                    const homeIcon = createIcon('ui', 'home', 'indicator-icon');
+                    const homeIcon = safeCreateIcon('ui', 'home', 'indicator-icon');
                     indicator.appendChild(homeIcon);
                 } else {
                     // Just use the default dot styling
@@ -155,7 +213,7 @@
                 
                 const iconDiv = document.createElement('div');
                 iconDiv.className = 'drawer-app-icon';
-                const icon = createIcon('ui', app.icon);
+                const icon = safeCreateIcon('ui', app.icon);
                 iconDiv.appendChild(icon);
                 
                 const infoDiv = document.createElement('div');
@@ -277,7 +335,7 @@
                 if (conditionsEl) conditionsEl.textContent = current.shortForecast;
                 if (weatherIconEl) {
                     weatherIconEl.innerHTML = '';
-                    const icon = getWeatherIcon(current.shortForecast);
+                    const icon = safeGetWeatherIcon(current.shortForecast);
                     weatherIconEl.appendChild(icon);
                 }
                 
@@ -291,7 +349,7 @@
                         
                         const iconDiv = document.createElement('div');
                         iconDiv.className = 'forecast-icon';
-                        const icon = getWeatherIcon(period.shortForecast);
+                        const icon = safeGetWeatherIcon(period.shortForecast);
                         iconDiv.appendChild(icon);
                         
                         item.innerHTML = `
@@ -393,9 +451,6 @@
             document.getElementById('app-drawer').classList.remove('open');
         }
 
-        document.getElementById('close-drawer').addEventListener('click', closeDrawer);
-        document.getElementById('drawer-button').addEventListener('click', openDrawer);
-
         // Touch/swipe handling
         function handleTouchStart(e) {
             touchStartX = e.changedTouches[0].screenX;
@@ -454,33 +509,46 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            // Apply theme
-            settingsManager.applyTheme();
-            
-            // Initialize dashboards and drawer
-            initDashboards();
-            initAppDrawer();
-            
-            // Update time every minute
-            setInterval(updateTime, 60000);
-            
-            // Update weather every 30 minutes
-            setInterval(fetchWeather, 1800000);
-            
-            // Update theme hourly (for time-based dark mode)
-            setInterval(() => settingsManager.applyTheme(), 3600000);
-            
-            // Event listeners
-            document.addEventListener('touchstart', handleTouchStart);
-            document.addEventListener('touchend', handleTouchEnd);
-            document.addEventListener('keydown', handleKeyboard);
-            
-            // Close drawer when clicking backdrop
-            document.getElementById('app-drawer').addEventListener('click', (e) => {
-                if (e.target.id === 'app-drawer') {
-                    closeDrawer();
+            try {
+                // Verify settingsManager is available
+                if (typeof settingsManager === 'undefined' || !settingsManager) {
+                    throw new Error('SettingsManager not initialized');
                 }
-            });
+
+                // Apply theme
+                settingsManager.applyTheme();
+                
+                // Initialize dashboards and drawer
+                initDashboards();
+                initAppDrawer();
+                
+                // Update time every minute
+                setInterval(updateTime, 60000);
+                
+                // Update weather every 30 minutes
+                setInterval(fetchWeather, 1800000);
+                
+                // Update theme hourly (for time-based dark mode)
+                setInterval(() => settingsManager.applyTheme(), 3600000);
+                
+                // Event listeners for drawer
+                document.getElementById('close-drawer').addEventListener('click', closeDrawer);
+                document.getElementById('drawer-button').addEventListener('click', openDrawer);
+                
+                // Event listeners for touch/keyboard navigation
+                document.addEventListener('touchstart', handleTouchStart);
+                document.addEventListener('touchend', handleTouchEnd);
+                document.addEventListener('keydown', handleKeyboard);
+                
+                // Close drawer when clicking backdrop
+                document.getElementById('app-drawer').addEventListener('click', (e) => {
+                    if (e.target.id === 'app-drawer') {
+                        closeDrawer();
+                    }
+                });
+            } catch (error) {
+                showError('Failed to initialize dashboard', error);
+            }
         });
     </script>
 </body>

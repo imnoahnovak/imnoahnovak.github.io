@@ -594,6 +594,38 @@ body.bg-striped {
   }
 }
 
+/* Error banner for debugging */
+.error-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--text-color);
+  color: var(--background-color);
+  padding: 20px;
+  border-bottom: 3px solid var(--border-color);
+  z-index: 9999;
+  display: none;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.error-banner.visible {
+  display: block;
+}
+
+.error-banner-title {
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.error-banner-message {
+  font-family: monospace;
+  font-size: 14px;
+  word-break: break-word;
+}
+
 /* Print-friendly / High contrast for e-ink */
 @media print, (prefers-contrast: high) {
   .dashboard {
