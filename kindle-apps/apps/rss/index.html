@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSS Reader - Kindle App</title>
+    <style>
+        :root {
+            --background-color: #ffffff;
+            --text-color: #000000;
+            --border-color: #000000;
+            --muted-color: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 24px;
+        }
+
+        .back-link {
+            text-decoration: none;
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .back-link:hover {
+            background-color: var(--text-color);
+            color: var(--background-color);
+        }
+
+        .feed-manager {
+            margin-bottom: 20px;
+        }
+
+        .add-feed {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .add-feed input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid var(--border-color);
+            font-size: 14px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .add-feed button {
+            padding: 10px 20px;
+            border: 2px solid var(--border-color);
+            background-color: var(--text-color);
+            color: var(--background-color);
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .add-feed button:hover {
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .feed-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .feed-pill {
+            padding: 8px 15px;
+            border: 2px solid var(--border-color);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feed-pill.active {
+            background-color: var(--text-color);
+            color: var(--background-color);
+        }
+
+        .feed-pill:hover {
+            background-color: var(--text-color);
+            color: var(--background-color);
+        }
+
+        .feed-remove {
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .articles-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .article-item {
+            border: 2px solid var(--border-color);
+            padding: 15px;
+        }
+
+        .article-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .article-title:hover {
+            text-decoration: underline;
+        }
+
+        .article-meta {
+            font-size: 12px;
+            color: var(--muted-color);
+            margin-bottom: 8px;
+        }
+
+        .article-description {
+            font-size: 14px;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .article-link {
+            display: inline-block;
+            padding: 8px 15px;
+            border: 2px solid var(--border-color);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .article-link:hover {
+            background-color: var(--text-color);
+            color: var(--background-color);
+        }
+
+        .loading, .error, .empty-state {
+            text-align: center;
+            padding: 40px;
+            border: 2px solid var(--border-color);
+            color: var(--muted-color);
+        }
+
+        .error {
+            color: var(--text-color);
+        }
+
+        .info-box {
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            margin-bottom: 20px;
+            font-size: 14px;
+            background-color: var(--muted-color);
+            color: var(--background-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>RSS Reader</h1>
+        <a href="../../index.html" class="back-link">← Dashboard</a>
+    </div>
+
+    <div class="info-box">
+        <strong>Note:</strong> Due to browser CORS restrictions, this reader works best with feeds that support CORS or use RSS2JSON proxy. Add your favorite RSS/Atom feed URLs below.
+    </div>
+
+    <div class="feed-manager">
+        <div class="add-feed">
+            <input type="url" id="feed-url" placeholder="Enter RSS feed URL (e.g., https://example.com/feed.xml)">
+            <button id="add-feed-btn">Add Feed</button>
+        </div>
+        <div class="feed-list" id="feed-list"></div>
+    </div>
+
+    <div class="articles-list" id="articles-list"></div>
+
+    <script src="../../settings.js"></script>
+    <script>
+        const STORAGE_KEY = 'kindle-rss-feeds';
+        let feeds = [];
+        let currentFeed = null;
+
+        // Load feeds from storage
+        function loadFeeds() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    feeds = JSON.parse(stored);
+                } else {
+                    // Default feeds (CORS-enabled examples)
+                    feeds = [];
+                }
+            } catch (e) {
+                console.error('Error loading feeds:', e);
+                feeds = [];
+            }
+            renderFeeds();
+        }
+
+        // Save feeds to storage
+        function saveFeeds() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(feeds));
+            } catch (e) {
+                console.error('Error saving feeds:', e);
+            }
+        }
+
+        // Add new feed
+        function addFeed() {
+            const input = document.getElementById('feed-url');
+            const url = input.value.trim();
+            
+            if (url) {
+                if (!feeds.find(f => f.url === url)) {
+                    feeds.push({ url, title: url });
+                    saveFeeds();
+                    renderFeeds();
+                    input.value = '';
+                }
+            }
+        }
+
+        // Remove feed
+        function removeFeed(url) {
+            feeds = feeds.filter(f => f.url !== url);
+            if (currentFeed === url) {
+                currentFeed = null;
+                document.getElementById('articles-list').innerHTML = '';
+            }
+            saveFeeds();
+            renderFeeds();
+        }
+
+        // Render feed list
+        function renderFeeds() {
+            const listEl = document.getElementById('feed-list');
+            listEl.innerHTML = '';
+
+            if (feeds.length === 0) {
+                listEl.innerHTML = '<div style="color: var(--muted-color); padding: 10px;">No feeds yet. Add one above!</div>';
+                return;
+            }
+
+            feeds.forEach(feed => {
+                const pill = document.createElement('div');
+                pill.className = 'feed-pill' + (currentFeed === feed.url ? ' active' : '');
+                
+                const title = document.createElement('span');
+                title.textContent = feed.title;
+                title.onclick = () => loadFeed(feed.url);
+                
+                const remove = document.createElement('span');
+                remove.className = 'feed-remove';
+                remove.textContent = '×';
+                remove.onclick = (e) => {
+                    e.stopPropagation();
+                    removeFeed(feed.url);
+                };
+                
+                pill.appendChild(title);
+                pill.appendChild(remove);
+                listEl.appendChild(pill);
+            });
+        }
+
+        // Load feed articles
+        async function loadFeed(url) {
+            currentFeed = url;
+            renderFeeds();
+            
+            const articlesEl = document.getElementById('articles-list');
+            articlesEl.innerHTML = '<div class="loading">Loading articles...</div>';
+
+            try {
+                // Use RSS2JSON service as a CORS proxy
+                const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`;
+                const response = await fetch(proxyUrl);
+                
+                if (!response.ok) throw new Error('Failed to fetch feed');
+                
+                const data = await response.json();
+                
+                if (data.status !== 'ok') throw new Error(data.message || 'Invalid feed');
+                
+                // Update feed title
+                const feed = feeds.find(f => f.url === url);
+                if (feed && data.feed && data.feed.title) {
+                    feed.title = data.feed.title;
+                    saveFeeds();
+                    renderFeeds();
+                }
+                
+                renderArticles(data.items || []);
+            } catch (error) {
+                console.error('Error loading feed:', error);
+                articlesEl.innerHTML = `<div class="error">Failed to load feed: ${error.message}<br><br>Try another feed or check the URL.</div>`;
+            }
+        }
+
+        // Render articles
+        function renderArticles(items) {
+            const articlesEl = document.getElementById('articles-list');
+            articlesEl.innerHTML = '';
+
+            if (items.length === 0) {
+                articlesEl.innerHTML = '<div class="empty-state">No articles found in this feed.</div>';
+                return;
+            }
+
+            items.forEach(item => {
+                const article = document.createElement('div');
+                article.className = 'article-item';
+                
+                const title = document.createElement('div');
+                title.className = 'article-title';
+                title.textContent = item.title || 'Untitled';
+                title.onclick = () => window.open(item.link, '_blank');
+                
+                const meta = document.createElement('div');
+                meta.className = 'article-meta';
+                const date = item.pubDate ? new Date(item.pubDate).toLocaleDateString() : 'No date';
+                const author = item.author ? ` • ${item.author}` : '';
+                meta.textContent = date + author;
+                
+                const description = document.createElement('div');
+                description.className = 'article-description';
+                // Strip HTML tags and limit length
+                const text = (item.description || item.content || '').replace(/<[^>]*>/g, '');
+                description.textContent = text.substring(0, 300) + (text.length > 300 ? '...' : '');
+                
+                const link = document.createElement('a');
+                link.className = 'article-link';
+                link.href = item.link;
+                link.target = '_blank';
+                link.textContent = 'Read More →';
+                
+                article.appendChild(title);
+                article.appendChild(meta);
+                article.appendChild(description);
+                article.appendChild(link);
+                
+                articlesEl.appendChild(article);
+            });
+        }
+
+        // Event listeners
+        document.getElementById('add-feed-btn').addEventListener('click', addFeed);
+        document.getElementById('feed-url').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addFeed();
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            settingsManager.applyTheme();
+            loadFeeds();
+        });
+    </script>
+</body>
+</html>
