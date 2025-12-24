@@ -6,6 +6,7 @@
   --panel: #ffffff;
   --border: #000000;
   --light-border: #cccccc;
+  --total-panels: 5;
 }
 
 :root.dark-mode {
@@ -65,7 +66,7 @@ body {
 
 .panels-wrapper {
   display: flex;
-  width: 500vw;
+  width: calc(var(--total-panels) * 100vw);
   height: 100vh;
   transition: transform 0.4s ease-in-out;
 }

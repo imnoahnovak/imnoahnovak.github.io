@@ -333,6 +333,7 @@ class Dashboard {
     showWeatherError(message) {
         document.getElementById('weatherCondition').textContent = message;
         document.getElementById('weatherTemp').textContent = '--°';
+        document.getElementById('weatherLocation').textContent = 'Set location';
     }
 
     // Calendar
@@ -463,14 +464,21 @@ class Dashboard {
                 year: 'numeric' 
             });
             
-            eventItem.innerHTML = `
-                <div>
-                    <strong>${event.title}</strong><br>
-                    <small>${formattedDate}</small>
-                </div>
-                <button onclick="dashboard.deleteEvent(${event.id})">Delete</button>
-            `;
+            const eventInfo = document.createElement('div');
+            const eventTitle = document.createElement('strong');
+            eventTitle.textContent = event.title;
+            const eventDateText = document.createElement('small');
+            eventDateText.textContent = formattedDate;
+            eventInfo.appendChild(eventTitle);
+            eventInfo.appendChild(document.createElement('br'));
+            eventInfo.appendChild(eventDateText);
             
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.addEventListener('click', () => this.deleteEvent(event.id));
+            
+            eventItem.appendChild(eventInfo);
+            eventItem.appendChild(deleteBtn);
             eventsList.appendChild(eventItem);
         });
     }
@@ -524,13 +532,22 @@ class Dashboard {
             const taskItem = document.createElement('div');
             taskItem.className = `task-item ${task.completed ? 'completed' : ''}`;
             
-            taskItem.innerHTML = `
-                <input type="checkbox" ${task.completed ? 'checked' : ''} 
-                       onchange="dashboard.toggleTask(${task.id})">
-                <span class="task-text">${task.text}</span>
-                <button onclick="dashboard.deleteTask(${task.id})">Delete</button>
-            `;
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = task.completed;
+            checkbox.addEventListener('change', () => this.toggleTask(task.id));
             
+            const taskText = document.createElement('span');
+            taskText.className = 'task-text';
+            taskText.textContent = task.text;
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.addEventListener('click', () => this.deleteTask(task.id));
+            
+            taskItem.appendChild(checkbox);
+            taskItem.appendChild(taskText);
+            taskItem.appendChild(deleteBtn);
             tasksList.appendChild(taskItem);
         });
     }
