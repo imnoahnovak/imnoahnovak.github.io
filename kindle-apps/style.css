@@ -265,6 +265,7 @@ body {
   transform: translateX(-50%);
   display: flex;
   gap: 10px;
+  align-items: center;
 }
 
 .indicator {
@@ -273,11 +274,210 @@ body {
   border: 2px solid var(--border-color);
   background-color: var(--background-color);
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .indicator.active {
   background-color: var(--text-color);
 }
+
+.indicator-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.indicator-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Drawer hint */
+.drawer-hint {
+  position: absolute;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: var(--muted-color);
+  text-align: center;
+}
+
+/* App Drawer */
+.app-drawer {
+  position: fixed;
+  top: 100%;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--background-color);
+  border-top: 2px solid var(--border-color);
+  transition: top 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-drawer.open {
+  top: 0;
+}
+
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.drawer-header h2 {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.close-drawer {
+  font-size: 32px;
+  border: 2px solid var(--border-color);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+
+.close-drawer:hover {
+  background-color: var(--text-color);
+  color: var(--background-color);
+}
+
+.drawer-apps {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 15px;
+  align-content: start;
+}
+
+.drawer-app-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+  border: 2px solid var(--border-color);
+  text-decoration: none;
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.drawer-app-item:hover {
+  background-color: var(--text-color);
+  color: var(--background-color);
+}
+
+.drawer-app-icon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.drawer-app-icon .icon {
+  width: 100%;
+  height: 100%;
+}
+
+.drawer-app-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.drawer-app-name {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.drawer-app-desc {
+  font-size: 14px;
+  color: var(--muted-color);
+}
+
+.drawer-app-item:hover .drawer-app-desc {
+  color: var(--background-color);
+  opacity: 0.8;
+}
+
+/* Icon styling */
+.icon {
+  display: inline-block;
+}
+
+.icon svg {
+  display: block;
+}
+
+.weather-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.weather-icon .icon {
+  width: 64px;
+  height: 64px;
+}
+
+.weather-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.forecast-icon .icon {
+  width: 32px;
+  height: 32px;
+}
+
+.forecast-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* App icon in quick links */
+.app-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  flex-shrink: 0;
+}
+
+.app-icon .icon {
+  width: 100%;
+  height: 100%;
+}
+
+.app-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.app-link-item {
+  display: flex;
+  align-items: center;
+}
+
 
 /* Mobile optimization */
 @media (max-width: 640px) {
@@ -289,8 +489,9 @@ body {
     font-size: 40px;
   }
 
-  .weather-icon {
-    font-size: 48px;
+  .weather-icon .icon {
+    width: 48px;
+    height: 48px;
   }
 
   .dashboard-title {
@@ -315,6 +516,15 @@ body {
   .calendar-day-header {
     font-size: 12px;
     padding: 8px 2px;
+  }
+
+  .drawer-apps {
+    grid-template-columns: 1fr;
+  }
+
+  .drawer-app-icon {
+    width: 40px;
+    height: 40px;
   }
 }
 

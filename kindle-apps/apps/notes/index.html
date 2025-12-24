@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notes - Kindle App</title>
     <style>
+        :root {
+            --background-color: #ffffff;
+            --text-color: #000000;
+            --border-color: #000000;
+            --muted-color: #333333;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -13,8 +20,8 @@
 
         body {
             font-family: Arial, sans-serif;
-            background-color: #ffffff;
-            color: #000000;
+            background-color: var(--background-color);
+            color: var(--text-color);
             padding: 20px;
         }
 
@@ -33,43 +40,68 @@
 
         .back-link {
             text-decoration: none;
-            color: #000000;
-            border: 2px solid #000000;
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
             padding: 8px 16px;
             font-size: 14px;
             font-weight: bold;
+        }
+
+        .back-link:hover {
+            background-color: var(--text-color);
+            color: var(--background-color);
         }
 
         textarea {
             width: 100%;
             min-height: 300px;
             padding: 15px;
-            border: 2px solid #000000;
+            border: 2px solid var(--border-color);
             font-family: Arial, sans-serif;
             font-size: 16px;
-            background-color: #ffffff;
-            color: #000000;
+            background-color: var(--background-color);
+            color: var(--text-color);
             resize: vertical;
         }
 
         textarea:focus {
             outline: none;
-            border-color: #000000;
+            border-color: var(--border-color);
+        }
+
+        .controls {
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .save-btn {
+            padding: 10px 20px;
+            border: 2px solid var(--border-color);
+            background-color: var(--text-color);
+            color: var(--background-color);
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .save-btn:hover {
+            background-color: var(--background-color);
+            color: var(--text-color);
         }
 
         .save-status {
-            margin-top: 10px;
             font-size: 14px;
-            color: #333333;
-            text-align: right;
+            color: var(--muted-color);
         }
 
         .info {
             margin-top: 20px;
             padding: 15px;
-            border: 1px solid #000000;
+            border: 1px solid var(--border-color);
             font-size: 14px;
-            color: #333333;
+            color: var(--muted-color);
         }
     </style>
 </head>
@@ -80,12 +112,17 @@
     </div>
 
     <textarea id="notepad" placeholder="Start typing your notes here..."></textarea>
-    <div class="save-status" id="status">Auto-saves every 2 seconds</div>
+    
+    <div class="controls">
+        <button class="save-btn" id="save-btn">Save Now</button>
+        <div class="save-status" id="status">Auto-saves every 2 seconds</div>
+    </div>
 
     <div class="info">
         <strong>Tip:</strong> Your notes are saved locally in your browser. They will persist across sessions but clearing browser data will delete them.
     </div>
 
+    <script src="../../settings.js"></script>
     <script>
         const textarea = document.getElementById('notepad');
         const status = document.getElementById('status');
@@ -114,8 +151,17 @@
             saveTimeout = setTimeout(saveNotes, AUTO_SAVE_DELAY);
         });
 
-        // Load notes on page load
-        loadNotes();
+        // Manual save button
+        document.getElementById('save-btn').addEventListener('click', () => {
+            clearTimeout(saveTimeout);
+            saveNotes();
+        });
+
+        // Apply theme and load notes
+        document.addEventListener('DOMContentLoaded', () => {
+            settingsManager.applyTheme();
+            loadNotes();
+        });
     </script>
 </body>
 </html>
