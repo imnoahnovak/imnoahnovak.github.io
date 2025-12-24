@@ -5,6 +5,7 @@ const SETTINGS_KEY = 'kindle-dashboard-settings';
 const DEFAULT_SETTINGS = {
     darkMode: 'off', // 'off', 'on', or 'time-based'
     timeFormat: '12hr', // '12hr' or '24hr'
+    backgroundPattern: 'blank', // 'blank', 'dotted', 'striped'
     weatherLocation: {
         lat: 40.7128,
         lon: -74.0060,
@@ -13,8 +14,7 @@ const DEFAULT_SETTINGS = {
     panels: [
         { id: 'dashboard-main', type: 'home', enabled: true, order: 0, removable: false },
         { id: 'dashboard-weather', type: 'panel', enabled: true, order: 1, removable: true },
-        { id: 'dashboard-calendar', type: 'panel', enabled: true, order: 2, removable: true },
-        { id: 'dashboard-apps', type: 'panel', enabled: true, order: 3, removable: true }
+        { id: 'dashboard-calendar', type: 'panel', enabled: true, order: 2, removable: true }
     ]
 };
 
@@ -85,13 +85,35 @@ class SettingsManager {
 
     applyTheme() {
         if (this.isDarkMode()) {
-            document.documentElement.style.setProperty('--background-color', '#000000');
-            document.documentElement.style.setProperty('--text-color', '#ffffff');
-            document.documentElement.style.setProperty('--muted-color', '#cccccc');
+            document.documentElement.style.setProperty('--background-color', '#222222');
+            document.documentElement.style.setProperty('--text-color', '#eeeeee');
+            document.documentElement.style.setProperty('--muted-color', '#aaaaaa');
         } else {
             document.documentElement.style.setProperty('--background-color', '#ffffff');
             document.documentElement.style.setProperty('--text-color', '#000000');
             document.documentElement.style.setProperty('--muted-color', '#333333');
+        }
+        this.applyBackgroundPattern();
+    }
+
+    applyBackgroundPattern() {
+        const pattern = this.settings.backgroundPattern || 'blank';
+        const isDark = this.isDarkMode();
+        const body = document.body;
+        
+        // Remove existing pattern classes
+        body.classList.remove('bg-blank', 'bg-dotted', 'bg-striped');
+        
+        // Apply new pattern
+        body.classList.add(`bg-${pattern}`);
+        
+        // Set pattern colors based on theme
+        if (pattern === 'dotted') {
+            const dotColor = isDark ? 'rgba(238, 238, 238, 0.15)' : 'rgba(0, 0, 0, 0.08)';
+            document.documentElement.style.setProperty('--pattern-color', dotColor);
+        } else if (pattern === 'striped') {
+            const stripeColor = isDark ? 'rgba(238, 238, 238, 0.08)' : 'rgba(0, 0, 0, 0.05)';
+            document.documentElement.style.setProperty('--pattern-color', stripeColor);
         }
     }
 

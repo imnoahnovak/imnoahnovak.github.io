@@ -85,32 +85,6 @@
                     </div>
                     <div class="nav-hint">← Swipe to navigate →</div>
                 `
-            },
-            'dashboard-apps': {
-                title: 'Quick Links',
-                render: () => `
-                    <div class="dashboard-content">
-                        <h2 class="dashboard-title">Quick Links</h2>
-                        <div class="apps-list">
-                            <a href="./apps/notes/index.html" class="app-item app-link-item">
-                                <div class="app-icon" id="icon-notes"></div>
-                                <div>
-                                    <div class="app-name">Notes</div>
-                                    <div class="app-desc">Simple notepad with save</div>
-                                </div>
-                            </a>
-                            <a href="./apps/tasks/index.html" class="app-item app-link-item">
-                                <div class="app-icon" id="icon-tasks"></div>
-                                <div>
-                                    <div class="app-name">Tasks</div>
-                                    <div class="app-desc">To-do list manager</div>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="app-note">Click "Apps" button to see all apps</div>
-                    </div>
-                    <div class="nav-hint">← Swipe to navigate →</div>
-                `
             }
         };
 
@@ -162,20 +136,6 @@
             updateTime();
             fetchWeather();
             generateCalendar();
-            
-            // Add icons to quick links panel if it exists
-            setTimeout(() => {
-                const notesIconEl = document.getElementById('icon-notes');
-                const tasksIconEl = document.getElementById('icon-tasks');
-                if (notesIconEl) {
-                    const notesIcon = createIcon('ui', 'notes');
-                    notesIconEl.appendChild(notesIcon);
-                }
-                if (tasksIconEl) {
-                    const tasksIcon = createIcon('ui', 'tasks');
-                    tasksIconEl.appendChild(tasksIcon);
-                }
-            }, 100);
         }
 
         // Initialize app drawer

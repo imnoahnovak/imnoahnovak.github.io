@@ -38,18 +38,35 @@
             font-size: 24px;
         }
 
-        .back-link {
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .back-link, .save-btn-header {
             text-decoration: none;
             color: var(--text-color);
             border: 2px solid var(--border-color);
             padding: 8px 16px;
             font-size: 14px;
             font-weight: bold;
+            background-color: var(--background-color);
+            cursor: pointer;
         }
 
-        .back-link:hover {
+        .back-link:hover, .save-btn-header:hover {
             background-color: var(--text-color);
             color: var(--background-color);
+        }
+
+        .save-btn-header {
+            background-color: var(--text-color);
+            color: var(--background-color);
+        }
+
+        .save-btn-header:hover {
+            background-color: var(--background-color);
+            color: var(--text-color);
         }
 
         .settings-section {
@@ -184,20 +201,7 @@
         }
 
         .save-btn {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid var(--border-color);
-            background-color: var(--text-color);
-            color: var(--background-color);
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-
-        .save-btn:hover {
-            background-color: var(--background-color);
-            color: var(--text-color);
+            display: none; /* Hidden - using header button instead */
         }
 
         .save-status {
@@ -228,7 +232,10 @@
 <body>
     <div class="header">
         <h1>Settings</h1>
-        <a href="../../index.html" class="back-link">← Dashboard</a>
+        <div class="header-buttons">
+            <button class="save-btn-header" id="save-btn">Save Settings</button>
+            <a href="../../index.html" class="back-link" id="back-link">← Dashboard</a>
+        </div>
     </div>
 
     <div class="settings-section">
@@ -248,6 +255,25 @@
                 <label class="radio-option">
                     <input type="radio" name="darkMode" value="time-based">
                     <span>Time-based (Dark 8 PM - 6 AM)</span>
+                </label>
+            </div>
+        </div>
+        
+        <div class="setting-item">
+            <label class="setting-label">Background Pattern</label>
+            <div class="setting-description">Choose a background pattern</div>
+            <div class="radio-group">
+                <label class="radio-option">
+                    <input type="radio" name="backgroundPattern" value="blank">
+                    <span>Blank (Solid color)</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="backgroundPattern" value="dotted">
+                    <span>Dotted</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="backgroundPattern" value="striped">
+                    <span>Striped</span>
                 </label>
             </div>
         </div>
@@ -304,6 +330,13 @@
 
     <script src="../../settings.js"></script>
     <script>
+        let hasUnsavedChanges = false;
+        
+        // Track changes
+        function markAsChanged() {
+            hasUnsavedChanges = true;
+        }
+        
         // Load current settings
         function loadSettings() {
             const settings = settingsManager.settings;
@@ -312,6 +345,14 @@
             const darkModeRadios = document.querySelectorAll('input[name="darkMode"]');
             darkModeRadios.forEach(radio => {
                 if (radio.value === settings.darkMode) {
+                    radio.checked = true;
+                }
+            });
+            
+            // Background pattern
+            const bgPatternRadios = document.querySelectorAll('input[name="backgroundPattern"]');
+            bgPatternRadios.forEach(radio => {
+                if (radio.value === (settings.backgroundPattern || 'blank')) {
                     radio.checked = true;
                 }
             });
@@ -335,6 +376,34 @@
             // Apply theme
             settingsManager.applyTheme();
         }
+
+        // Add change listeners to all inputs
+        function addChangeListeners() {
+            document.querySelectorAll('input, select').forEach(input => {
+                input.addEventListener('change', markAsChanged);
+                if (input.type === 'text' || input.type === 'number') {
+                    input.addEventListener('input', markAsChanged);
+                }
+            });
+        }
+        
+        // Warn before leaving with unsaved changes
+        window.addEventListener('beforeunload', (e) => {
+            if (hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        });
+        
+        // Handle back button click
+        document.getElementById('back-link').addEventListener('click', (e) => {
+            if (hasUnsavedChanges) {
+                if (!confirm('You have unsaved changes. Do you want to leave without saving?')) {
+                    e.preventDefault();
+                }
+            }
+        });
 
         // Render panel list
         function renderPanels() {
@@ -366,8 +435,7 @@
             const names = {
                 'dashboard-main': 'Home',
                 'dashboard-weather': 'Weather Forecast',
-                'dashboard-calendar': 'Calendar',
-                'dashboard-apps': 'Apps'
+                'dashboard-calendar': 'Calendar'
             };
             return names[id] || id;
         }
@@ -416,6 +484,10 @@
                 const darkMode = document.querySelector('input[name="darkMode"]:checked').value;
                 settingsManager.setSetting('darkMode', darkMode);
                 
+                // Get background pattern
+                const backgroundPattern = document.querySelector('input[name="backgroundPattern"]:checked').value;
+                settingsManager.setSetting('backgroundPattern', backgroundPattern);
+                
                 // Get time format
                 const timeFormat = document.querySelector('input[name="timeFormat"]:checked').value;
                 settingsManager.setSetting('timeFormat', timeFormat);
@@ -431,6 +503,8 @@
                 // Apply theme immediately
                 settingsManager.applyTheme();
                 
+                hasUnsavedChanges = false;
+                
                 status.textContent = 'Settings saved successfully!';
                 status.style.color = 'var(--text-color)';
                 
@@ -444,7 +518,10 @@
         });
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', loadSettings);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+            addChangeListeners();
+        });
     </script>
 </body>
 </html>
