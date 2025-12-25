@@ -146,7 +146,8 @@ const Icons = {
 
 // Helper function to create icon element
 function createIcon(category, name, className = '') {
-    const icon = Icons[category]?.[name];
+    const iconCategory = Icons[category];
+    const icon = iconCategory ? iconCategory[name] : undefined;
     if (!icon) {
         console.warn(`Icon not found: ${category}.${name}`);
         return document.createElement('div');
