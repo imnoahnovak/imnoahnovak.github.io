@@ -372,24 +372,69 @@
                 // Fetch weather alerts
                 fetchWeatherAlerts(pointData.properties.zone || null);
                 
-                // Get forecast
-                const forecastResponse = await fetch(pointData.properties.forecast);
-                if (!forecastResponse.ok) throw new Error('Forecast fetch failed');
-                const forecastData = await forecastResponse.json();
+                // Get current observations from nearest station
+                let current = null;
+                try {
+                    // Get list of observation stations
+                    const stationsUrl = pointData.properties.observationStations;
+                    const stationsResponse = await fetch(stationsUrl);
+                    if (stationsResponse.ok) {
+                        const stationsData = await stationsResponse.json();
+                        if (stationsData.features && stationsData.features.length > 0) {
+                            // Get latest observation from first station
+                            const stationId = stationsData.features[0].properties.stationIdentifier;
+                            const obsResponse = await fetch(`https://api.weather.gov/stations/${stationId}/observations/latest`);
+                            if (obsResponse.ok) {
+                                const obsData = await obsResponse.json();
+                                current = obsData.properties;
+                            }
+                        }
+                    }
+                } catch (obsError) {
+                    console.warn('Could not fetch current observations, falling back to forecast:', obsError);
+                }
                 
-                // Current conditions (first period)
-                const current = forecastData.properties.periods[0];
+                // Update current weather display
                 const tempEl = document.getElementById('temperature');
                 const conditionsEl = document.getElementById('conditions');
                 const weatherIconEl = document.getElementById('weather-icon');
                 
-                if (tempEl) tempEl.textContent = current.temperature + '°' + current.temperatureUnit;
-                if (conditionsEl) conditionsEl.textContent = current.shortForecast;
-                if (weatherIconEl) {
-                    weatherIconEl.innerHTML = '';
-                    const icon = safeGetWeatherIcon(current.shortForecast);
-                    weatherIconEl.appendChild(icon);
+                if (current) {
+                    // Use actual current observations
+                    const tempC = current.temperature.value;
+                    const tempF = tempC !== null ? Math.round(tempC * 9/5 + 32) : null;
+                    
+                    if (tempEl) {
+                        tempEl.textContent = tempF !== null ? tempF + '°F' : 'N/A';
+                    }
+                    if (conditionsEl) {
+                        conditionsEl.textContent = current.textDescription || 'N/A';
+                    }
+                    if (weatherIconEl) {
+                        weatherIconEl.innerHTML = '';
+                        const icon = safeGetWeatherIcon(current.textDescription || '');
+                        weatherIconEl.appendChild(icon);
+                    }
+                } else {
+                    // Fallback to forecast data if observations unavailable
+                    const forecastResponse = await fetch(pointData.properties.forecast);
+                    if (!forecastResponse.ok) throw new Error('Forecast fetch failed');
+                    const forecastData = await forecastResponse.json();
+                    const firstPeriod = forecastData.properties.periods[0];
+                    
+                    if (tempEl) tempEl.textContent = firstPeriod.temperature + '°' + firstPeriod.temperatureUnit;
+                    if (conditionsEl) conditionsEl.textContent = firstPeriod.shortForecast;
+                    if (weatherIconEl) {
+                        weatherIconEl.innerHTML = '';
+                        const icon = safeGetWeatherIcon(firstPeriod.shortForecast);
+                        weatherIconEl.appendChild(icon);
+                    }
                 }
+                
+                // Get forecast for forecast dashboard
+                const forecastResponse = await fetch(pointData.properties.forecast);
+                if (!forecastResponse.ok) throw new Error('Forecast fetch failed');
+                const forecastData = await forecastResponse.json();
                 
                 // Forecast list
                 const forecastList = document.getElementById('forecast');
