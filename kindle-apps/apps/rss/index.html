@@ -283,18 +283,15 @@
             feeds.forEach(feed => {
                 const pill = document.createElement('div');
                 pill.className = 'feed-pill' + (currentFeed === feed.url ? ' active' : '');
+                pill.dataset.url = feed.url;
                 
                 const title = document.createElement('span');
                 title.textContent = feed.title;
-                title.onclick = () => loadFeed(feed.url);
                 
                 const remove = document.createElement('span');
                 remove.className = 'feed-remove';
                 remove.textContent = '×';
-                remove.onclick = (e) => {
-                    e.stopPropagation();
-                    removeFeed(feed.url);
-                };
+                remove.dataset.action = 'remove';
                 
                 pill.appendChild(title);
                 pill.appendChild(remove);
@@ -353,7 +350,7 @@
                 const title = document.createElement('div');
                 title.className = 'article-title';
                 title.textContent = item.title || 'Untitled';
-                title.onclick = () => window.open(item.link, '_blank');
+                title.dataset.link = item.link;
                 
                 const meta = document.createElement('div');
                 meta.className = 'article-meta';
@@ -386,6 +383,28 @@
         document.getElementById('add-feed-btn').addEventListener('click', addFeed);
         document.getElementById('feed-url').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') addFeed();
+        });
+
+        // Event delegation for feed list
+        document.getElementById('feed-list').addEventListener('click', (e) => {
+            const pill = e.target.closest('.feed-pill');
+            if (!pill) return;
+            
+            // Check if remove button was clicked
+            if (e.target.classList.contains('feed-remove')) {
+                e.stopPropagation();
+                removeFeed(pill.dataset.url);
+            } else {
+                // Load feed
+                loadFeed(pill.dataset.url);
+            }
+        });
+
+        // Event delegation for article titles
+        document.getElementById('articles-list').addEventListener('click', (e) => {
+            if (e.target.classList.contains('article-title') && e.target.dataset.link) {
+                window.open(e.target.dataset.link, '_blank');
+            }
         });
 
         // Initialize
