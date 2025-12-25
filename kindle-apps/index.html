@@ -234,7 +234,6 @@
 
         const READING_STORAGE_KEY = 'kindle-reading-log';
         const RSS_STORAGE_KEY = 'kindle-rss-feeds';
-        const RSS_CACHE_KEY = 'kindle-rss-cache';
 
         // App list for drawer
         const apps = [
@@ -621,33 +620,26 @@
                     return;
                 }
 
-                const ranked = [...books]
-                    .filter(Boolean)
-                    .sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0));
+                const nowReading = books
+                    .filter(book => book && book.status === 'reading')
+                    .sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0))
+                    .slice(0, 5);
 
-                const prioritized = ranked.filter(book => book.status === 'reading');
-                const topFive = (prioritized.length > 0 ? prioritized : ranked).slice(0, 5);
-
-                if (topFive.length === 0) {
-                    preview.innerHTML = '<div class="empty-state">No books found yet. Add one in Reading Log.</div>';
+                if (nowReading.length === 0) {
+                    preview.innerHTML = '<div class="empty-state">No books marked as “Reading” yet.</div>';
                     return;
                 }
 
                 preview.innerHTML = '';
-                topFive.forEach(book => {
+                nowReading.forEach(book => {
                     const item = document.createElement('div');
                     item.className = 'preview-item';
                     const rating = book.rating && Number(book.rating) > 0 ? ' • ' + '★'.repeat(Math.min(5, book.rating)) : '';
-                    const statusLabel = book.status === 'reading'
-                        ? 'Reading now'
-                        : book.status === 'completed'
-                            ? 'Finished'
-                            : 'Queued';
 
                     item.innerHTML = `
                         <div class="preview-title">${escapeHtml(book.title || 'Untitled')}</div>
                         <div class="preview-meta">${escapeHtml(book.author || 'Unknown author')}${rating}</div>
-                        <div class="preview-meta">${statusLabel} • ${formatRecentDate(book.updatedAt || book.createdAt)}</div>
+                        <div class="preview-meta">Updated ${formatRecentDate(book.updatedAt || book.createdAt)}</div>
                     `;
 
                     preview.appendChild(item);
@@ -666,7 +658,7 @@
             const data = await response.json();
             if (data.status !== 'ok') throw new Error(data.message || 'Invalid feed');
 
-            const feedTitle = (data.feed && data.feed.title) || feed.title || feed.url;
+            const feedTitle = data.feed?.title || feed.title || feed.url;
             const items = Array.isArray(data.items) ? data.items : [];
 
             return items.slice(0, 3).map(item => ({
@@ -677,48 +669,11 @@
             }));
         }
 
-        function renderCachedRss(preview) {
-            try {
-                const stored = localStorage.getItem(RSS_CACHE_KEY);
-                if (!stored) return false;
-
-                const cached = JSON.parse(stored);
-                if (!Array.isArray(cached) || cached.length === 0) return false;
-
-                preview.innerHTML = '';
-                cached.slice(0, 5).forEach(article => {
-                    const item = document.createElement('a');
-                    item.className = 'preview-item';
-                    item.href = article.link || '#';
-                    item.target = '_blank';
-                    item.rel = 'noopener noreferrer';
-
-                    const dateLabel = article.date
-                        ? new Date(article.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                        : 'Recent';
-
-                    item.innerHTML = `
-                        <div class="preview-title">${escapeHtml(article.title || 'Untitled')}</div>
-                        <div class="preview-meta">${escapeHtml(article.feedTitle || 'Feed')} • ${dateLabel}</div>
-                    `;
-
-                    preview.appendChild(item);
-                });
-                return true;
-            } catch (error) {
-                console.error('RSS cache parse error:', error);
-                return false;
-            }
-        }
-
         async function renderRssUpdates() {
             const preview = document.getElementById('rss-preview');
             if (!preview) return;
 
             preview.innerHTML = '<div class="loading">Checking feeds...</div>';
-
-            // Show cached articles immediately so the panel never looks empty
-            const cacheShown = renderCachedRss(preview);
 
             let feeds = [];
             try {
@@ -729,9 +684,7 @@
             }
 
             if (!Array.isArray(feeds) || feeds.length === 0) {
-                if (!cacheShown) {
-                    preview.innerHTML = '<div class="empty-state">Add feeds in the RSS app to see updates here.</div>';
-                }
+                preview.innerHTML = '<div class="empty-state">Add feeds in the RSS app to see updates here.</div>';
                 return;
             }
 
@@ -747,12 +700,6 @@
                         date: item.pubDate ? new Date(item.pubDate) : null
                     }))
                     .filter(item => item.title && item.feedTitle);
-
-                if (articles.length === 0 && cacheShown) {
-                    // Keep the cached view if the refresh failed to return anything
-                    preview.insertAdjacentHTML('beforeend', '<div class="empty-state">No new articles yet. Showing cached items.</div>');
-                    return;
-                }
 
                 if (articles.length === 0) {
                     preview.innerHTML = '<div class="empty-state">Feeds added, but no recent articles were returned.</div>';
@@ -778,20 +725,9 @@
 
                     preview.appendChild(item);
                 });
-
-                // Cache the newest articles so the panel has content even when offline next time
-                try {
-                    localStorage.setItem(RSS_CACHE_KEY, JSON.stringify(articles.slice(0, 10)));
-                } catch (error) {
-                    console.error('RSS cache save error:', error);
-                }
             } catch (error) {
                 console.error('RSS preview error:', error);
-                if (!cacheShown) {
-                    preview.innerHTML = '<div class="error">Could not load feed updates. Open the RSS app to verify your feeds.</div>';
-                } else {
-                    preview.insertAdjacentHTML('beforeend', '<div class="empty-state">Live refresh failed. Showing cached items.</div>');
-                }
+                preview.innerHTML = '<div class="error">Could not load feed updates. Open the RSS app to verify your feeds.</div>';
             }
         }
 

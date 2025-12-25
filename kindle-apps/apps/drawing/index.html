@@ -48,7 +48,7 @@
 
         .toolbar {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 10px;
             margin-bottom: 12px;
         }
@@ -84,15 +84,9 @@
             color: var(--background-color);
         }
 
-        .compact-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 10px;
-        }
-
         .color-dot {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border: 2px solid var(--border-color);
             background: #000;
             cursor: pointer;
@@ -114,7 +108,6 @@
             border: 3px solid var(--border-color);
             background: var(--surface-color);
             min-height: 360px;
-            touch-action: none;
         }
 
         canvas {
@@ -175,7 +168,7 @@
 
     <div class="toolbar">
         <div class="tool-group">
-            <h3>Tools</h3>
+            <h3>Tool</h3>
             <div class="button-row" id="tool-buttons"></div>
             <div class="slider-row">
                 <label for="size">Stroke</label>
@@ -184,19 +177,20 @@
             </div>
         </div>
         <div class="tool-group">
-            <h3>Ink & Canvas</h3>
-            <div class="compact-row">
-                <div class="button-row" id="color-buttons"></div>
-                <div class="button-row" style="justify-content:flex-end;">
-                    <button class="btn" id="clear-canvas">Clear</button>
-                    <button class="btn" id="save-drawing">Save</button>
-                </div>
+            <h3>Ink</h3>
+            <div class="button-row" id="color-buttons"></div>
+            <div class="hint">All inks are grayscale to stay crisp on e-ink.</div>
+        </div>
+        <div class="tool-group">
+            <h3>Canvas</h3>
+            <div class="button-row">
+                <button class="btn" id="clear-canvas">Clear</button>
+                <button class="btn" id="save-drawing">Save</button>
             </div>
             <div class="button-row" style="margin-top:8px;">
                 <button class="btn" id="use-as-background">Use current as background</button>
-                <button class="btn" id="reset-background">Reset background</button>
             </div>
-            <div class="hint">Tap a color, pick a stroke size, then draw. Backgrounds stay visible while you ink on top.</div>
+            <div class="hint">Use a saved drawing as the canvas background, then ink on top.</div>
         </div>
     </div>
 
@@ -227,42 +221,22 @@
         let lastX = 0;
         let lastY = 0;
         let savedDrawings = [];
-        let backgroundImage = null;
-        let backgroundData = null;
 
         const canvas = document.getElementById('drawing-canvas');
         const ctx = canvas.getContext('2d');
 
         function resizeCanvas() {
             const wrapper = document.getElementById('canvas-wrapper');
-            const snapshot = new Image();
-            snapshot.onload = () => {
-                canvas.width = wrapper.clientWidth;
-                canvas.height = Math.max(360, wrapper.clientWidth * 0.65);
-                redrawBase();
-                ctx.drawImage(snapshot, 0, 0, canvas.width, canvas.height);
-            };
-            snapshot.src = canvas.toDataURL();
-        }
-
-        function applyBackgroundImage(dataUrl) {
-            backgroundData = dataUrl;
+            const data = canvas.toDataURL();
             const img = new Image();
             img.onload = () => {
-                backgroundImage = img;
-                redrawBase();
+                canvas.width = wrapper.clientWidth;
+                canvas.height = Math.max(360, wrapper.clientWidth * 0.65);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             };
-            img.src = dataUrl;
-        }
-
-        function redrawBase() {
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.globalAlpha = 1;
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            if (backgroundImage) {
-                ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
-            }
+            img.src = data;
         }
 
         function setTool(toolKey) {
@@ -318,7 +292,10 @@
         }
 
         function clearCanvas() {
-            redrawBase();
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
         function saveDrawing() {
@@ -339,7 +316,12 @@
         }
 
         function useAsBackground(entry) {
-            applyBackgroundImage(entry.data);
+            const wrapper = document.getElementById('canvas-wrapper');
+            wrapper.style.backgroundImage = `url(${entry.data})`;
+            wrapper.style.backgroundSize = 'contain';
+            wrapper.style.backgroundRepeat = 'no-repeat';
+            wrapper.style.backgroundPosition = 'center';
+            clearCanvas();
         }
 
         function renderSaved() {
@@ -373,25 +355,13 @@
                 bgBtn.textContent = 'Set as background';
                 bgBtn.addEventListener('click', () => useAsBackground(entry));
 
-                const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'btn';
-                deleteBtn.textContent = 'Delete';
-                deleteBtn.addEventListener('click', () => deleteDrawing(entry.id));
-
                 actions.appendChild(loadBtn);
                 actions.appendChild(bgBtn);
-                actions.appendChild(deleteBtn);
 
                 card.appendChild(img);
                 card.appendChild(actions);
                 grid.appendChild(card);
             });
-        }
-
-        function deleteDrawing(id) {
-            savedDrawings = savedDrawings.filter(entry => entry.id !== id);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(savedDrawings.slice(0, 30)));
-            renderSaved();
         }
 
         function loadSavedDrawings() {
@@ -436,11 +406,6 @@
                 const data = canvas.toDataURL('image/png');
                 useAsBackground({ data });
             });
-            document.getElementById('reset-background').addEventListener('click', () => {
-                backgroundImage = null;
-                backgroundData = null;
-                clearCanvas();
-            });
         }
 
         function bindCanvas() {
@@ -454,14 +419,11 @@
             };
 
             const start = (event) => {
-                event.preventDefault();
                 const { x, y } = toCanvasCoords(event);
                 startDraw(x, y);
             };
 
             const move = (event) => {
-                if (!isDrawing) return;
-                event.preventDefault();
                 const { x, y } = toCanvasCoords(event);
                 drawLine(x, y);
             };
@@ -473,7 +435,6 @@
             wrapper.addEventListener('pointermove', move);
             wrapper.addEventListener('pointerup', () => stopDraw());
             wrapper.addEventListener('pointerleave', () => stopDraw());
-            wrapper.addEventListener('pointercancel', () => stopDraw());
         }
 
         document.addEventListener('DOMContentLoaded', () => {
