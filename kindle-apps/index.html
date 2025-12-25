@@ -226,7 +226,12 @@
                 const dashboard = document.createElement('div');
                 dashboard.className = 'dashboard' + (index === 0 ? ' active' : '');
                 dashboard.id = panel.id;
-                dashboard.innerHTML = panelTemplates[panel.id].render();
+                const template = panelTemplates[panel.id];
+                if (!template) {
+                    console.warn(`Unknown panel id "${panel.id}", skipping.`);
+                    return;
+                }
+                dashboard.innerHTML = template.render();
                 wrapper.appendChild(dashboard);
 
                 // Create indicator

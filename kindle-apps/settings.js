@@ -33,11 +33,7 @@ class SettingsManager {
             const stored = localStorage.getItem(SETTINGS_KEY);
             if (stored) {
                 const parsed = JSON.parse(stored);
-                // Validate that panels is an array
-                if (parsed.panels && !Array.isArray(parsed.panels)) {
-                    console.warn('Invalid panels data in settings, resetting to default');
-                    parsed.panels = DEFAULT_SETTINGS.panels;
-                }
+                parsed.panels = this.sanitizePanels(parsed.panels);
                 // Merge with defaults to ensure new settings are present
                 return { ...DEFAULT_SETTINGS, ...parsed };
             }
@@ -67,8 +63,37 @@ class SettingsManager {
         return true;
     }
 
+    sanitizePanels(panels) {
+        // Start from defaults if panels data is missing or malformed
+        if (!panels || !Array.isArray(panels)) {
+            return [...DEFAULT_SETTINGS.panels];
+        }
+
+        const validIds = new Set(DEFAULT_SETTINGS.panels.map(panel => panel.id));
+        const filteredPanels = panels
+            .filter(panel => panel && validIds.has(panel.id))
+            .map(panel => ({ ...panel }));
+
+        // Ensure required home panel always exists
+        if (!filteredPanels.some(panel => panel.id === 'dashboard-main')) {
+            filteredPanels.unshift({ ...DEFAULT_SETTINGS.panels[0] });
+        }
+
+        // Merge with defaults for missing properties and normalize order
+        const defaultsById = Object.fromEntries(
+            DEFAULT_SETTINGS.panels.map(panel => [panel.id, panel])
+        );
+
+        const mergedPanels = filteredPanels
+            .map(panel => ({ ...defaultsById[panel.id], ...panel }))
+            .sort((a, b) => (a.order || 0) - (b.order || 0))
+            .map((panel, index) => ({ ...panel, order: index }));
+
+        return mergedPanels;
+    }
+
     updatePanels(panels) {
-        this.settings.panels = panels;
+        this.settings.panels = this.sanitizePanels(panels);
         this.saveSettings();
     }
 
