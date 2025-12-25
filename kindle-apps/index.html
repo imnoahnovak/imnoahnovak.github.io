@@ -28,7 +28,7 @@
     <div class="app-drawer" id="app-drawer">
         <div class="drawer-header">
             <h2>Apps</h2>
-            <button class="close-drawer" id="close-drawer">×</button>
+            <button class="close-drawer" id="close-drawer" aria-label="Close apps">×</button>
         </div>
         <div class="drawer-apps" id="drawer-apps">
             <!-- Apps will be inserted here -->
@@ -204,10 +204,10 @@
             { name: 'Tasks', desc: 'To-do list manager', url: './apps/tasks/index.html', icon: 'tasks' },
             { name: 'Timer', desc: 'Multiple countdown timers', url: './apps/timer/index.html', icon: 'timer' },
             { name: 'Calculator', desc: 'Calculator + unit converter', url: './apps/calculator/index.html', icon: 'calculator' },
-            { name: 'RSS Reader', desc: 'Follow RSS/Atom feeds', url: './apps/rss/index.html', icon: 'notes' },
-            { name: 'Breathing', desc: 'Breathing exercises', url: './apps/breathing/index.html', icon: 'weather' },
-            { name: 'Contacts', desc: 'Local contact book', url: './apps/contacts/index.html', icon: 'tasks' },
-            { name: 'Reading Log', desc: 'Track your reading', url: './apps/reading-log/index.html', icon: 'notes' },
+            { name: 'RSS Reader', desc: 'Follow RSS/Atom feeds', url: './apps/rss/index.html', icon: 'rss' },
+            { name: 'Breathing', desc: 'Breathing exercises', url: './apps/breathing/index.html', icon: 'breathing' },
+            { name: 'Contacts', desc: 'Local contact book', url: './apps/contacts/index.html', icon: 'contacts' },
+            { name: 'Reading Log', desc: 'Track your reading', url: './apps/reading-log/index.html', icon: 'reading' },
             { name: 'Settings', desc: 'Configure dashboard', url: './apps/settings/index.html', icon: 'settings' }
         ];
 
@@ -226,7 +226,12 @@
                 const dashboard = document.createElement('div');
                 dashboard.className = 'dashboard' + (index === 0 ? ' active' : '');
                 dashboard.id = panel.id;
-                dashboard.innerHTML = panelTemplates[panel.id].render();
+                const template = panelTemplates[panel.id];
+                if (!template) {
+                    console.warn(`Unknown panel id "${panel.id}", skipping.`);
+                    return;
+                }
+                dashboard.innerHTML = template.render();
                 wrapper.appendChild(dashboard);
 
                 // Create indicator
