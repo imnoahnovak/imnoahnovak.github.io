@@ -277,14 +277,14 @@
             // Handle delete button clicks
             if (e.target.classList.contains('task-delete')) {
                 const id = parseInt(e.target.getAttribute('data-id'), 10);
-                if (id) {
+                if (!isNaN(id)) {
                     deleteTask(id);
                 }
             }
             // Handle checkbox clicks (for Kindle compatibility, use click instead of change)
             else if (e.target.classList.contains('task-checkbox')) {
                 const id = parseInt(e.target.getAttribute('data-id'), 10);
-                if (id) {
+                if (!isNaN(id)) {
                     toggleTask(id);
                 }
             }

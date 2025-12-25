@@ -452,31 +452,31 @@
             // Handle delete button clicks
             if (target.classList.contains('timer-delete')) {
                 const id = parseInt(target.getAttribute('data-id'), 10);
-                if (id) {
+                if (!isNaN(id)) {
                     deleteTimer(id);
                 }
             }
             // Handle toggle (start/pause/resume) button clicks
             else if (target.classList.contains('timer-toggle')) {
                 const id = parseInt(target.getAttribute('data-id'), 10);
-                if (id) {
+                if (!isNaN(id)) {
                     toggleTimer(id);
                 }
             }
             // Handle stop/reset button clicks
             else if (target.classList.contains('timer-stop')) {
                 const id = parseInt(target.getAttribute('data-id'), 10);
-                if (id) {
+                if (!isNaN(id)) {
                     stopTimer(id);
                 }
             }
             // Handle preset button clicks
             else if (target.classList.contains('preset-btn')) {
                 const id = parseInt(target.getAttribute('data-id'), 10);
-                const hours = parseInt(target.getAttribute('data-hours'), 10);
-                const minutes = parseInt(target.getAttribute('data-minutes'), 10);
-                const seconds = parseInt(target.getAttribute('data-seconds'), 10);
-                if (id) {
+                const hours = parseInt(target.getAttribute('data-hours'), 10) || 0;
+                const minutes = parseInt(target.getAttribute('data-minutes'), 10) || 0;
+                const seconds = parseInt(target.getAttribute('data-seconds'), 10) || 0;
+                if (!isNaN(id)) {
                     setPreset(id, hours, minutes, seconds);
                 }
             }
