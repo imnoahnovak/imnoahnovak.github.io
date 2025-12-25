@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drawing Pad - Kindle App</title>
+    <style>
+        :root {
+            --background-color: #ffffff;
+            --text-color: #000000;
+            --border-color: #000000;
+            --muted-color: #444444;
+            --surface-color: #f6f6f6;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: var(--background-color);
+            color: var(--text-color);
+            padding: 16px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .title {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        a.back-link {
+            text-decoration: none;
+            border: 2px solid var(--border-color);
+            padding: 8px 14px;
+            color: var(--text-color);
+            font-weight: bold;
+        }
+
+        .toolbar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .tool-group {
+            border: 2px solid var(--border-color);
+            padding: 10px;
+            background: var(--surface-color);
+        }
+
+        .tool-group h3 {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .btn {
+            border: 2px solid var(--border-color);
+            background: var(--background-color);
+            color: var(--text-color);
+            padding: 8px 12px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn.active {
+            background: var(--text-color);
+            color: var(--background-color);
+        }
+
+        .compact-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
+        }
+
+        .color-dot {
+            width: 32px;
+            height: 32px;
+            border: 2px solid var(--border-color);
+            background: #000;
+            cursor: pointer;
+        }
+
+        .color-dot.active {
+            outline: 3px solid var(--border-color);
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            border: 3px solid var(--border-color);
+            background: var(--surface-color);
+            min-height: 360px;
+            touch-action: none;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .saved-drawings {
+            margin-top: 16px;
+        }
+
+        .saved-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+        }
+
+        .saved-card {
+            border: 2px solid var(--border-color);
+            padding: 8px;
+            background: var(--surface-color);
+        }
+
+        .saved-card img {
+            width: 100%;
+            height: 140px;
+            object-fit: contain;
+            border: 1px solid var(--border-color);
+            background: #fff;
+        }
+
+        .saved-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+
+        .hint {
+            color: var(--muted-color);
+            font-size: 13px;
+            margin-top: 6px;
+        }
+
+        @media (max-width: 600px) {
+            .toolbar {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title">Drawing Pad</div>
+        <a class="back-link" href="../../index.html">Back</a>
+    </div>
+
+    <div class="toolbar">
+        <div class="tool-group">
+            <h3>Tools</h3>
+            <div class="button-row" id="tool-buttons"></div>
+            <div class="slider-row">
+                <label for="size">Stroke</label>
+                <input type="range" id="size" min="1" max="40" value="8">
+                <span id="size-label">8px</span>
+            </div>
+        </div>
+        <div class="tool-group">
+            <h3>Ink & Canvas</h3>
+            <div class="compact-row">
+                <div class="button-row" id="color-buttons"></div>
+                <div class="button-row" style="justify-content:flex-end;">
+                    <button class="btn" id="clear-canvas">Clear</button>
+                    <button class="btn" id="save-drawing">Save</button>
+                </div>
+            </div>
+            <div class="button-row" style="margin-top:8px;">
+                <button class="btn" id="use-as-background">Use current as background</button>
+                <button class="btn" id="reset-background">Reset background</button>
+            </div>
+            <div class="hint">Tap a color, pick a stroke size, then draw. Backgrounds stay visible while you ink on top.</div>
+        </div>
+    </div>
+
+    <div class="canvas-wrapper" id="canvas-wrapper">
+        <canvas id="drawing-canvas" width="900" height="600"></canvas>
+    </div>
+
+    <div class="saved-drawings">
+        <h2>Saved Drawings</h2>
+        <div class="hint">Tap a thumbnail to load it. "Set as background" lets you draw over that saved image.</div>
+        <div class="saved-grid" id="saved-grid"></div>
+    </div>
+
+    <script src="../../settings.js"></script>
+    <script>
+        const STORAGE_KEY = 'kindle-drawing-notebook';
+        const tools = {
+            pencil: { label: 'Pencil', width: 4, alpha: 0.9 },
+            pen: { label: 'Pen', width: 7, alpha: 1 },
+            marker: { label: 'Marker', width: 16, alpha: 0.35 },
+            eraser: { label: 'Eraser', width: 22, alpha: 1, mode: 'erase' }
+        };
+        const colors = ['#000000', '#333333', '#666666', '#999999', '#cccccc', '#ffffff'];
+
+        let currentTool = 'pen';
+        let currentColor = '#000000';
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let savedDrawings = [];
+        let backgroundImage = null;
+        let backgroundData = null;
+
+        const canvas = document.getElementById('drawing-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            const wrapper = document.getElementById('canvas-wrapper');
+            const data = canvas.toDataURL();
+            const img = new Image();
+            img.onload = () => {
+                canvas.width = wrapper.clientWidth;
+                canvas.height = Math.max(360, wrapper.clientWidth * 0.65);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                if (backgroundData) {
+                    applyBackgroundImage(backgroundData);
+                }
+            };
+            img.src = data;
+        }
+
+        function applyBackgroundImage(dataUrl) {
+            backgroundData = dataUrl;
+            const img = new Image();
+            img.onload = () => {
+                backgroundImage = img;
+                redrawBase();
+            };
+            img.src = dataUrl;
+        }
+
+        function redrawBase() {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            if (backgroundImage) {
+                ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        function setTool(toolKey) {
+            currentTool = toolKey;
+            document.querySelectorAll('#tool-buttons .btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tool === toolKey);
+            });
+            const tool = tools[toolKey];
+            document.getElementById('size').value = tool.width;
+            document.getElementById('size-label').textContent = tool.width + 'px';
+        }
+
+        function setColor(color) {
+            currentColor = color;
+            document.querySelectorAll('.color-dot').forEach(dot => {
+                dot.classList.toggle('active', dot.dataset.color === color);
+            });
+        }
+
+        function startDraw(x, y) {
+            isDrawing = true;
+            lastX = x;
+            lastY = y;
+        }
+
+        function drawLine(x, y) {
+            if (!isDrawing) return;
+            const tool = tools[currentTool];
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.lineWidth = parseInt(document.getElementById('size').value, 10) || tool.width;
+
+            if (tool.mode === 'erase') {
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.strokeStyle = 'rgba(0,0,0,1)';
+                ctx.globalAlpha = 1;
+            } else {
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.strokeStyle = currentColor;
+                ctx.globalAlpha = tool.alpha;
+            }
+
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            lastX = x;
+            lastY = y;
+        }
+
+        function stopDraw() {
+            isDrawing = false;
+        }
+
+        function clearCanvas() {
+            redrawBase();
+        }
+
+        function saveDrawing() {
+            const data = canvas.toDataURL('image/png');
+            const entry = { id: Date.now(), data, createdAt: new Date().toISOString() };
+            savedDrawings.unshift(entry);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(savedDrawings.slice(0, 30)));
+            renderSaved();
+        }
+
+        function loadDrawing(entry) {
+            const img = new Image();
+            img.onload = () => {
+                clearCanvas();
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            };
+            img.src = entry.data;
+        }
+
+        function useAsBackground(entry) {
+            applyBackgroundImage(entry.data);
+        }
+
+        function renderSaved() {
+            const grid = document.getElementById('saved-grid');
+            grid.innerHTML = '';
+
+            if (savedDrawings.length === 0) {
+                grid.innerHTML = '<div style="color: var(--muted-color);">No drawings yet. Save one to reuse it later.</div>';
+                return;
+            }
+
+            savedDrawings.slice(0, 12).forEach(entry => {
+                const card = document.createElement('div');
+                card.className = 'saved-card';
+
+                const img = document.createElement('img');
+                img.src = entry.data;
+                img.alt = 'Saved drawing';
+                img.addEventListener('click', () => loadDrawing(entry));
+
+                const actions = document.createElement('div');
+                actions.className = 'saved-actions';
+
+                const loadBtn = document.createElement('button');
+                loadBtn.className = 'btn';
+                loadBtn.textContent = 'Load';
+                loadBtn.addEventListener('click', () => loadDrawing(entry));
+
+                const bgBtn = document.createElement('button');
+                bgBtn.className = 'btn';
+                bgBtn.textContent = 'Set as background';
+                bgBtn.addEventListener('click', () => useAsBackground(entry));
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn';
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.addEventListener('click', () => deleteDrawing(entry.id));
+
+                actions.appendChild(loadBtn);
+                actions.appendChild(bgBtn);
+                actions.appendChild(deleteBtn);
+
+                card.appendChild(img);
+                card.appendChild(actions);
+                grid.appendChild(card);
+            });
+        }
+
+        function deleteDrawing(id) {
+            savedDrawings = savedDrawings.filter(entry => entry.id !== id);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(savedDrawings.slice(0, 30)));
+            renderSaved();
+        }
+
+        function loadSavedDrawings() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                savedDrawings = stored ? JSON.parse(stored) : [];
+            } catch (error) {
+                console.error('Failed to load drawings', error);
+                savedDrawings = [];
+            }
+            renderSaved();
+        }
+
+        function bindToolbar() {
+            const toolButtons = document.getElementById('tool-buttons');
+            Object.entries(tools).forEach(([key, meta]) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn';
+                btn.dataset.tool = key;
+                btn.textContent = meta.label;
+                btn.addEventListener('click', () => setTool(key));
+                toolButtons.appendChild(btn);
+            });
+
+            const colorButtons = document.getElementById('color-buttons');
+            colors.forEach(color => {
+                const dot = document.createElement('button');
+                dot.className = 'color-dot';
+                dot.dataset.color = color;
+                dot.style.background = color;
+                dot.addEventListener('click', () => setColor(color));
+                colorButtons.appendChild(dot);
+            });
+
+            document.getElementById('size').addEventListener('input', (e) => {
+                document.getElementById('size-label').textContent = `${e.target.value}px`;
+            });
+
+            document.getElementById('clear-canvas').addEventListener('click', clearCanvas);
+            document.getElementById('save-drawing').addEventListener('click', saveDrawing);
+            document.getElementById('use-as-background').addEventListener('click', () => {
+                const data = canvas.toDataURL('image/png');
+                useAsBackground({ data });
+            });
+            document.getElementById('reset-background').addEventListener('click', () => {
+                backgroundImage = null;
+                backgroundData = null;
+                clearCanvas();
+            });
+        }
+
+        function bindCanvas() {
+            const wrapper = document.getElementById('canvas-wrapper');
+            const toCanvasCoords = (event) => {
+                const rect = canvas.getBoundingClientRect();
+                return {
+                    x: (event.clientX - rect.left) * (canvas.width / rect.width),
+                    y: (event.clientY - rect.top) * (canvas.height / rect.height)
+                };
+            };
+
+            const start = (event) => {
+                event.preventDefault();
+                const { x, y } = toCanvasCoords(event);
+                startDraw(x, y);
+            };
+
+            const move = (event) => {
+                if (!isDrawing) return;
+                event.preventDefault();
+                const { x, y } = toCanvasCoords(event);
+                drawLine(x, y);
+            };
+
+            wrapper.addEventListener('pointerdown', (e) => {
+                wrapper.setPointerCapture(e.pointerId);
+                start(e);
+            });
+            wrapper.addEventListener('pointermove', move);
+            wrapper.addEventListener('pointerup', () => stopDraw());
+            wrapper.addEventListener('pointerleave', () => stopDraw());
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            settingsManager.applyTheme();
+            bindToolbar();
+            bindCanvas();
+            loadSavedDrawings();
+            resizeCanvas();
+            setTool('pen');
+            setColor('#000000');
+            clearCanvas();
+            window.addEventListener('resize', resizeCanvas);
+        });
+    </script>
+</body>
+</html>

@@ -380,6 +380,7 @@
         </div>
     </div>
 
+    <script src="../../confirm.js"></script>
     <script src="../../settings.js"></script>
     <script>
         const STORAGE_KEY = 'kindle-reading-log';
@@ -557,14 +558,20 @@
         }
 
         // Delete current book
-        function deleteCurrentBook() {
+        async function deleteCurrentBook() {
             if (!currentBookId) return;
 
-            if (confirm('Are you sure you want to delete this book?')) {
-                books = books.filter(b => b.id !== currentBookId);
-                saveBooks();
-                showListView();
-            }
+            const confirmed = await showConfirmDialog({
+                message: 'Delete this book?',
+                confirmText: 'Delete',
+                destructive: true
+            });
+
+            if (!confirmed) return;
+
+            books = books.filter(b => b.id !== currentBookId);
+            saveBooks();
+            showListView();
         }
 
         // Escape HTML

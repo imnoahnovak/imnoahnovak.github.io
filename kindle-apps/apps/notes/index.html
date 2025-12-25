@@ -233,6 +233,7 @@
         <div class="save-status" id="save-status">Auto-saves every 2 seconds</div>
     </div>
 
+    <script src="../../confirm.js"></script>
     <script src="../../settings.js"></script>
     <script>
         const STORAGE_KEY = 'kindle-notes-v2';
@@ -370,14 +371,20 @@
         }
 
         // Delete current note
-        function deleteCurrentNote() {
+        async function deleteCurrentNote() {
             if (!currentNoteId) return;
 
-            if (confirm('Are you sure you want to delete this note?')) {
-                notes = notes.filter(n => n.id !== currentNoteId);
-                saveNotes();
-                showListView();
-            }
+            const confirmed = await showConfirmDialog({
+                message: 'Delete this note?',
+                confirmText: 'Delete',
+                destructive: true
+            });
+
+            if (!confirmed) return;
+
+            notes = notes.filter(n => n.id !== currentNoteId);
+            saveNotes();
+            showListView();
         }
 
         // Auto-save on input

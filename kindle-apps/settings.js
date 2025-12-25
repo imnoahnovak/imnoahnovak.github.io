@@ -1,14 +1,15 @@
 // Settings management for Kindle Dashboard
 const SETTINGS_KEY = 'kindle-dashboard-settings';
 
-// Pattern opacity constants
-const PATTERN_OPACITY_DARK = 0.12;
-const PATTERN_OPACITY_LIGHT = 0.08;
+// Pattern opacity constants (boosted for better visibility)
+const PATTERN_OPACITY_DARK = 0.22;
+const PATTERN_OPACITY_LIGHT = 0.16;
 
 // Default settings
 const DEFAULT_SETTINGS = {
     darkMode: 'off', // 'off', 'on', or 'time-based'
     timeFormat: '12hr', // '12hr' or '24hr'
+    clockStyle: 'digital', // 'digital' or 'analog'
     backgroundPattern: 'blank', // 'blank', 'dotted', 'striped'
     weatherLocation: {
         lat: 40.7128,
@@ -18,7 +19,9 @@ const DEFAULT_SETTINGS = {
     panels: [
         { id: 'dashboard-main', type: 'home', enabled: true, order: 0, removable: false },
         { id: 'dashboard-weather', type: 'panel', enabled: true, order: 1, removable: true },
-        { id: 'dashboard-calendar', type: 'panel', enabled: true, order: 2, removable: true }
+        { id: 'dashboard-calendar', type: 'panel', enabled: true, order: 2, removable: true },
+        { id: 'dashboard-reading-log', type: 'panel', enabled: true, order: 3, removable: true },
+        { id: 'dashboard-rss', type: 'panel', enabled: true, order: 4, removable: true }
     ]
 };
 
@@ -33,11 +36,7 @@ class SettingsManager {
             const stored = localStorage.getItem(SETTINGS_KEY);
             if (stored) {
                 const parsed = JSON.parse(stored);
-                // Validate that panels is an array
-                if (parsed.panels && !Array.isArray(parsed.panels)) {
-                    console.warn('Invalid panels data in settings, resetting to default');
-                    parsed.panels = DEFAULT_SETTINGS.panels;
-                }
+                parsed.panels = this.sanitizePanels(parsed.panels);
                 // Merge with defaults to ensure new settings are present
                 return { ...DEFAULT_SETTINGS, ...parsed };
             }
@@ -67,8 +66,42 @@ class SettingsManager {
         return true;
     }
 
+    sanitizePanels(panels) {
+        // Start from defaults if panels data is missing or malformed
+        if (!panels || !Array.isArray(panels)) {
+            return [...DEFAULT_SETTINGS.panels];
+        }
+
+        const validIds = new Set(DEFAULT_SETTINGS.panels.map(panel => panel.id));
+        const filteredPanels = panels
+            .filter(panel => panel && validIds.has(panel.id))
+            .map(panel => ({ ...panel }));
+
+        DEFAULT_SETTINGS.panels.forEach(defaultPanel => {
+            if (!filteredPanels.some(panel => panel.id === defaultPanel.id)) {
+                filteredPanels.push({ ...defaultPanel });
+            }
+        });
+        // Ensure required home panel always exists
+        if (!filteredPanels.some(panel => panel.id === 'dashboard-main')) {
+            filteredPanels.unshift({ ...DEFAULT_SETTINGS.panels[0] });
+        }
+
+        // Merge with defaults for missing properties and normalize order
+        const defaultsById = Object.fromEntries(
+            DEFAULT_SETTINGS.panels.map(panel => [panel.id, panel])
+        );
+
+        const mergedPanels = filteredPanels
+            .map(panel => ({ ...defaultsById[panel.id], ...panel }))
+            .sort((a, b) => (a.order || 0) - (b.order || 0))
+            .map((panel, index) => ({ ...panel, order: index }));
+
+        return mergedPanels;
+    }
+
     updatePanels(panels) {
-        this.settings.panels = panels;
+        this.settings.panels = this.sanitizePanels(panels);
         this.saveSettings();
     }
 
@@ -98,11 +131,13 @@ class SettingsManager {
             document.documentElement.style.setProperty('--text-color', '#eeeeee');
             document.documentElement.style.setProperty('--muted-color', '#aaaaaa');
             document.documentElement.style.setProperty('--border-color', '#eeeeee');
+            document.documentElement.style.setProperty('--surface-color', '#111111');
         } else {
             document.documentElement.style.setProperty('--background-color', '#ffffff');
             document.documentElement.style.setProperty('--text-color', '#000000');
             document.documentElement.style.setProperty('--muted-color', '#333333');
             document.documentElement.style.setProperty('--border-color', '#000000');
+            document.documentElement.style.setProperty('--surface-color', '#f6f6f6');
         }
         // Apply background pattern after theme colors are set
         this.applyBackgroundPattern();

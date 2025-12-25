@@ -4,7 +4,8 @@
   --text-color: #000000;
   --border-color: #000000;
   --muted-color: #333333;
-  --pattern-color: rgba(0, 0, 0, 0.08);
+  --surface-color: #f6f6f6;
+  --pattern-color: rgba(0, 0, 0, 0.14);
 }
 
 * {
@@ -29,17 +30,17 @@ body.bg-blank {
 }
 
 body.bg-dotted {
-  background-image: radial-gradient(circle, var(--pattern-color) 1px, transparent 1px);
-  background-size: 20px 20px;
+  background-image: radial-gradient(circle, var(--pattern-color) 2.5px, transparent 3px);
+  background-size: 18px 18px;
 }
 
 body.bg-striped {
   background-image: repeating-linear-gradient(
     45deg,
-    transparent,
-    transparent 10px,
-    var(--pattern-color) 10px,
-    var(--pattern-color) 11px
+    var(--pattern-color),
+    var(--pattern-color) 4px,
+    transparent 4px,
+    transparent 14px
   );
 }
 
@@ -93,6 +94,79 @@ body.bg-striped {
   margin-bottom: 10px;
 }
 
+.clock-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.analog-clock {
+  display: none;
+  justify-content: center;
+  width: 100%;
+}
+
+.analog-face {
+  width: 180px;
+  height: 180px;
+  border: 3px solid var(--border-color);
+  border-radius: 50%;
+  position: relative;
+  background: var(--surface-color);
+}
+
+.analog-face::before,
+.analog-face::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  width: 2px;
+  height: 16px;
+  background: var(--border-color);
+  transform-origin: center 90px;
+}
+
+.analog-face::before {
+  top: 4px;
+  transform: translateX(-50%);
+}
+
+.analog-face::after {
+  bottom: 4px;
+  transform: translate(-50%, 0) rotate(180deg);
+}
+
+.hand {
+  position: absolute;
+  bottom: 50%;
+  left: 50%;
+  transform-origin: bottom center;
+  background: var(--text-color);
+  border-radius: 4px;
+}
+
+.hour-hand {
+  width: 6px;
+  height: 45px;
+}
+
+.minute-hand {
+  width: 4px;
+  height: 70px;
+}
+
+.center-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--text-color);
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 .date {
   font-size: 18px;
   color: var(--muted-color);
@@ -100,8 +174,8 @@ body.bg-striped {
 
 .weather-display {
   border: 2px solid var(--border-color);
-  background-color: var(--border-color);
-  color: var(--background-color);
+  background-color: var(--surface-color);
+  color: var(--text-color);
   padding: 15px;
   margin-top: 20px;
 }
@@ -115,6 +189,57 @@ body.bg-striped {
 .conditions {
   font-size: 16px;
   opacity: 0.9;
+}
+
+.panel-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.panel-btn {
+  padding: 8px 12px;
+  border: 2px solid var(--border-color);
+  background: var(--surface-color);
+  color: var(--text-color);
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.panel-btn:active {
+  background: var(--text-color);
+  color: var(--background-color);
+}
+
+.list-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+.preview-item {
+  border: 2px solid var(--border-color);
+  padding: 10px;
+  background: var(--surface-color);
+}
+
+.preview-title {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.preview-meta {
+  font-size: 12px;
+  color: var(--muted-color);
+  margin-top: 2px;
+}
+
+.empty-state {
+  border: 2px solid var(--border-color);
+  padding: 12px;
+  color: var(--muted-color);
+  text-align: center;
 }
 
 /* Weather Forecast Dashboard */
@@ -294,16 +419,6 @@ body.bg-striped {
   font-size: 13px;
   color: var(--muted-color);
   text-align: center;
-}
-
-/* Navigation hint */
-.nav-hint {
-  position: absolute;
-  bottom: 50px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 14px;
-  color: var(--muted-color);
 }
 
 /* Page indicators */
@@ -487,9 +602,12 @@ body.bg-striped {
 
 /* Icon styling */
 .icon {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 24px;
   height: 24px;
+  line-height: 1;
 }
 
 .icon svg {
@@ -498,6 +616,16 @@ body.bg-striped {
   height: 100%;
   fill: currentColor;
   stroke: currentColor;
+}
+
+.icon .material-symbols-rounded {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 500,
+    'GRAD' 0,
+    'opsz' 24;
+  font-size: 24px;
+  line-height: 1;
 }
 
 /* App icon in quick links */
