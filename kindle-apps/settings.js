@@ -82,7 +82,6 @@ class SettingsManager {
                 filteredPanels.push({ ...defaultPanel });
             }
         });
-
         // Ensure required home panel always exists
         if (!filteredPanels.some(panel => panel.id === 'dashboard-main')) {
             filteredPanels.unshift({ ...DEFAULT_SETTINGS.panels[0] });
