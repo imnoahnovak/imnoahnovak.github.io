@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,300..700,0..1,-50..200&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="./style.css">
     <title>Kindle Dashboard</title>
 </head>
@@ -157,7 +160,16 @@
                 render: () => `
                     <div class="dashboard-content">
                         <div class="time-display">
-                            <div id="clock" class="clock">--:--</div>
+                            <div class="clock-stack">
+                                <div id="clock" class="clock clock-digital">--:--</div>
+                                <div id="analog-clock" class="analog-clock" aria-hidden="true">
+                                    <div class="analog-face">
+                                        <div class="hand hour-hand"></div>
+                                        <div class="hand minute-hand"></div>
+                                        <div class="center-dot"></div>
+                                    </div>
+                                </div>
+                            </div>
                             <div id="date" class="date">Loading...</div>
                         </div>
                         <div class="weather-display">
@@ -165,7 +177,6 @@
                             <div id="conditions" class="conditions">Loading weather...</div>
                         </div>
                     </div>
-                    <div class="nav-hint">← Swipe to navigate →</div>
                 `
             },
             'dashboard-weather': {
@@ -178,7 +189,6 @@
                             <div class="loading">Loading forecast...</div>
                         </div>
                     </div>
-                    <div class="nav-hint">← Swipe to navigate →</div>
                 `
             },
             'dashboard-calendar': {
@@ -193,10 +203,37 @@
                             <div class="calendar-grid" id="calendar-grid"></div>
                         </div>
                     </div>
-                    <div class="nav-hint">← Swipe to navigate →</div>
+                `
+            },
+            'dashboard-reading-log': {
+                title: 'Reading Log',
+                render: () => `
+                    <div class="dashboard-content">
+                        <h2 class="dashboard-title">Reading Now</h2>
+                        <div id="reading-preview" class="list-preview">
+                            <div class="loading">Loading reading log...</div>
+                        </div>
+                    </div>
+                `
+            },
+            'dashboard-rss': {
+                title: 'Recent Feeds',
+                render: () => `
+                    <div class="dashboard-content">
+                        <h2 class="dashboard-title">Latest RSS Updates</h2>
+                        <div class="panel-actions">
+                            <button class="panel-btn" id="refresh-rss">Refresh</button>
+                        </div>
+                        <div id="rss-preview" class="list-preview">
+                            <div class="loading">Checking feeds...</div>
+                        </div>
+                    </div>
                 `
             }
         };
+
+        const READING_STORAGE_KEY = 'kindle-reading-log';
+        const RSS_STORAGE_KEY = 'kindle-rss-feeds';
 
         // App list for drawer
         const apps = [
@@ -208,6 +245,7 @@
             { name: 'Breathing', desc: 'Breathing exercises', url: './apps/breathing/index.html', icon: 'breathing' },
             { name: 'Contacts', desc: 'Local contact book', url: './apps/contacts/index.html', icon: 'contacts' },
             { name: 'Reading Log', desc: 'Track your reading', url: './apps/reading-log/index.html', icon: 'reading' },
+            { name: 'Drawing', desc: 'Sketch in grayscale with tools', url: './apps/drawing/index.html', icon: 'drawing' },
             { name: 'Settings', desc: 'Configure dashboard', url: './apps/settings/index.html', icon: 'settings' }
         ];
 
@@ -255,6 +293,14 @@
             updateTime();
             fetchWeather();
             generateCalendar();
+            renderReadingPreview();
+            renderRssUpdates();
+
+            const refreshBtn = document.getElementById('refresh-rss');
+            if (refreshBtn && !refreshBtn.dataset.bound) {
+                refreshBtn.dataset.bound = 'true';
+                refreshBtn.addEventListener('click', () => renderRssUpdates());
+            }
         }
 
         // Initialize app drawer
@@ -288,25 +334,57 @@
         function updateTime() {
             const now = new Date();
             const clockEl = document.getElementById('clock');
-            if (!clockEl) return;
+            const analogEl = document.getElementById('analog-clock');
 
             const timeFormat = settingsManager.getSetting('timeFormat');
             let hours = now.getHours();
             const minutes = String(now.getMinutes()).padStart(2, '0');
-            
-            if (timeFormat === '12hr') {
-                const ampm = hours >= 12 ? 'PM' : 'AM';
-                hours = hours % 12;
-                hours = hours ? hours : 12; // 0 should be 12
-                clockEl.textContent = hours + ':' + minutes + ' ' + ampm;
-            } else {
-                clockEl.textContent = String(hours).padStart(2, '0') + ':' + minutes;
+
+            if (clockEl) {
+                if (timeFormat === '12hr') {
+                    const ampm = hours >= 12 ? 'PM' : 'AM';
+                    hours = hours % 12;
+                    hours = hours ? hours : 12; // 0 should be 12
+                    clockEl.textContent = hours + ':' + minutes + ' ' + ampm;
+                } else {
+                    clockEl.textContent = String(hours).padStart(2, '0') + ':' + minutes;
+                }
             }
-            
+
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             const dateEl = document.getElementById('date');
             if (dateEl) {
                 dateEl.textContent = now.toLocaleDateString('en-US', options);
+            }
+
+            updateClockStyle(settingsManager.getSetting('clockStyle') || 'digital', now, analogEl, clockEl);
+        }
+
+        function updateClockStyle(style, now, analogEl, clockEl) {
+            if (clockEl) {
+                clockEl.style.display = style === 'digital' ? 'block' : 'none';
+            }
+
+            if (!analogEl) return;
+
+            analogEl.style.display = style === 'analog' ? 'flex' : 'none';
+
+            if (style !== 'analog') return;
+
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+
+            const hourHand = analogEl.querySelector('.hour-hand');
+            const minuteHand = analogEl.querySelector('.minute-hand');
+
+            if (hourHand) {
+                const hourDeg = ((hours % 12) + minutes / 60) * 30; // 360 / 12
+                hourHand.style.transform = `translate(-50%, 0) rotate(${hourDeg}deg)`;
+            }
+
+            if (minuteHand) {
+                const minuteDeg = minutes * 6; // 360 / 60
+                minuteHand.style.transform = `translate(-50%, 0) rotate(${minuteDeg}deg)`;
             }
         }
 
@@ -506,6 +584,153 @@
             }
         }
 
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text || '';
+            return div.innerHTML;
+        }
+
+        function formatRecentDate(value) {
+            if (!value) return '';
+            const parsed = new Date(value);
+            if (Number.isNaN(parsed.getTime())) return '';
+
+            const now = new Date();
+            const diffMs = now - parsed;
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 0) return 'Today';
+            if (diffDays === 1) return 'Yesterday';
+            if (diffDays < 7) return `${diffDays} days ago`;
+            return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        function renderReadingPreview() {
+            const preview = document.getElementById('reading-preview');
+            if (!preview) return;
+
+            try {
+                preview.innerHTML = '<div class="loading">Loading reading log...</div>';
+
+                const stored = localStorage.getItem(READING_STORAGE_KEY);
+                const books = stored ? JSON.parse(stored) : [];
+
+                if (!Array.isArray(books) || books.length === 0) {
+                    preview.innerHTML = '<div class="empty-state">No reading in progress. Add books in Reading Log.</div>';
+                    return;
+                }
+
+                const nowReading = books
+                    .filter(book => book && book.status === 'reading')
+                    .sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0))
+                    .slice(0, 5);
+
+                if (nowReading.length === 0) {
+                    preview.innerHTML = '<div class="empty-state">No books marked as “Reading” yet.</div>';
+                    return;
+                }
+
+                preview.innerHTML = '';
+                nowReading.forEach(book => {
+                    const item = document.createElement('div');
+                    item.className = 'preview-item';
+                    const rating = book.rating && Number(book.rating) > 0 ? ' • ' + '★'.repeat(Math.min(5, book.rating)) : '';
+
+                    item.innerHTML = `
+                        <div class="preview-title">${escapeHtml(book.title || 'Untitled')}</div>
+                        <div class="preview-meta">${escapeHtml(book.author || 'Unknown author')}${rating}</div>
+                        <div class="preview-meta">Updated ${formatRecentDate(book.updatedAt || book.createdAt)}</div>
+                    `;
+
+                    preview.appendChild(item);
+                });
+            } catch (error) {
+                console.error('Reading preview error:', error);
+                preview.innerHTML = '<div class="error">Unable to read your log. Open the Reading Log app once to reset it.</div>';
+            }
+        }
+
+        async function fetchFeedItems(feed) {
+            const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}`;
+            const response = await fetch(proxyUrl);
+            if (!response.ok) throw new Error('Failed to fetch feed');
+
+            const data = await response.json();
+            if (data.status !== 'ok') throw new Error(data.message || 'Invalid feed');
+
+            const feedTitle = data.feed?.title || feed.title || feed.url;
+            const items = Array.isArray(data.items) ? data.items : [];
+
+            return items.slice(0, 3).map(item => ({
+                title: item.title || 'Untitled',
+                link: item.link,
+                feedTitle,
+                pubDate: item.pubDate || item.pubdate || item.date
+            }));
+        }
+
+        async function renderRssUpdates() {
+            const preview = document.getElementById('rss-preview');
+            if (!preview) return;
+
+            preview.innerHTML = '<div class="loading">Checking feeds...</div>';
+
+            let feeds = [];
+            try {
+                const stored = localStorage.getItem(RSS_STORAGE_KEY);
+                feeds = stored ? JSON.parse(stored) : [];
+            } catch (error) {
+                console.error('RSS storage parse error:', error);
+            }
+
+            if (!Array.isArray(feeds) || feeds.length === 0) {
+                preview.innerHTML = '<div class="empty-state">Add feeds in the RSS app to see updates here.</div>';
+                return;
+            }
+
+            try {
+                const limitedFeeds = feeds.slice(0, 3);
+                const results = await Promise.allSettled(limitedFeeds.map(feed => fetchFeedItems(feed)));
+
+                const articles = results
+                    .filter(result => result.status === 'fulfilled')
+                    .flatMap(result => result.value)
+                    .map(item => ({
+                        ...item,
+                        date: item.pubDate ? new Date(item.pubDate) : null
+                    }))
+                    .filter(item => item.title && item.feedTitle);
+
+                if (articles.length === 0) {
+                    preview.innerHTML = '<div class="empty-state">Feeds added, but no recent articles were returned.</div>';
+                    return;
+                }
+
+                articles.sort((a, b) => (b.date || 0) - (a.date || 0));
+
+                preview.innerHTML = '';
+                articles.slice(0, 5).forEach(article => {
+                    const item = document.createElement('a');
+                    item.className = 'preview-item';
+                    item.href = article.link || '#';
+                    item.target = '_blank';
+                    item.rel = 'noopener noreferrer';
+
+                    const dateLabel = article.date ? article.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Recent';
+
+                    item.innerHTML = `
+                        <div class="preview-title">${escapeHtml(article.title)}</div>
+                        <div class="preview-meta">${escapeHtml(article.feedTitle)} • ${dateLabel}</div>
+                    `;
+
+                    preview.appendChild(item);
+                });
+            } catch (error) {
+                console.error('RSS preview error:', error);
+                preview.innerHTML = '<div class="error">Could not load feed updates. Open the RSS app to verify your feeds.</div>';
+            }
+        }
+
         // Dashboard navigation
         function showDashboard(index) {
             if (index < 0) index = 0;
@@ -619,7 +844,23 @@
                 document.addEventListener('touchstart', handleTouchStart);
                 document.addEventListener('touchend', handleTouchEnd);
                 document.addEventListener('keydown', handleKeyboard);
-                
+
+                window.addEventListener('storage', (event) => {
+                    if (event.key === READING_STORAGE_KEY) {
+                        renderReadingPreview();
+                    } else if (event.key === RSS_STORAGE_KEY) {
+                        renderRssUpdates();
+                    }
+                });
+
+                document.addEventListener('visibilitychange', () => {
+                    if (!document.hidden) {
+                        renderReadingPreview();
+                        renderRssUpdates();
+                        updateTime();
+                    }
+                });
+
                 // Close drawer when clicking backdrop
                 document.getElementById('app-drawer').addEventListener('click', (e) => {
                     if (e.target.id === 'app-drawer') {

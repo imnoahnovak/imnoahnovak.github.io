@@ -61,16 +61,16 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            gap: 30px;
-            max-width: 600px;
+            gap: 24px;
+            max-width: 560px;
             margin: 0 auto;
             width: 100%;
         }
 
         .circle-container {
             position: relative;
-            width: 250px;
-            height: 250px;
+            width: 200px;
+            height: 200px;
         }
 
         .breathing-circle {
@@ -78,18 +78,17 @@
             height: 100%;
             border: 4px solid var(--border-color);
             border-radius: 50%;
-            transition: transform 4s ease-in-out;
+            transition: transform 3.5s ease-in-out;
+            transform: scale(1);
         }
 
-        .breathing-circle.inhale {
-            transform: scale(1.5);
+        .breathing-circle.expand,
+        .breathing-circle.hold-expanded {
+            transform: scale(1.35);
         }
 
-        .breathing-circle.hold {
-            transform: scale(1.5);
-        }
-
-        .breathing-circle.exhale {
+        .breathing-circle.rest,
+        .breathing-circle.hold-rest {
             transform: scale(1);
         }
 
@@ -160,10 +159,23 @@
             max-width: 500px;
         }
 
+        .hide-when-active {
+            transition: opacity 0.2s ease;
+        }
+
+        body.breathing-active .hide-when-active {
+            opacity: 0;
+            height: 0;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            border: 0;
+        }
+
         @media (max-width: 640px) {
             .circle-container {
-                width: 200px;
-                height: 200px;
+                width: 160px;
+                height: 160px;
             }
 
             .instruction-text {
@@ -183,7 +195,7 @@
     </div>
 
     <div class="breathing-container">
-        <div class="technique-selector">
+        <div class="technique-selector hide-when-active">
             <select id="technique-select" onchange="changeTechnique()">
                 <option value="box">Box Breathing (4-4-4-4)</option>
                 <option value="478">4-7-8 Technique</option>
@@ -192,7 +204,7 @@
             </select>
         </div>
 
-        <div class="technique-info" id="technique-info"></div>
+        <div class="technique-info hide-when-active" id="technique-info"></div>
 
         <div class="circle-container">
             <div class="breathing-circle" id="breathing-circle"></div>
@@ -200,7 +212,7 @@
 
         <div class="instruction-text" id="instruction-text">Ready to begin</div>
         
-        <div class="timer-text" id="timer-text"></div>
+        <div class="timer-text hide-when-active" id="timer-text"></div>
 
         <div class="controls">
             <button class="control-btn" id="start-btn">Start</button>
@@ -215,37 +227,37 @@
                 name: 'Box Breathing',
                 description: 'Equal inhale, hold, exhale, hold. Great for stress relief and focus.',
                 pattern: [
-                    { phase: 'inhale', duration: 4 },
-                    { phase: 'hold', duration: 4 },
-                    { phase: 'exhale', duration: 4 },
-                    { phase: 'hold', duration: 4 }
+                    { phase: 'inhale', duration: 4, circleClass: 'expand' },
+                    { phase: 'hold', duration: 4, circleClass: 'hold-expanded' },
+                    { phase: 'exhale', duration: 4, circleClass: 'rest' },
+                    { phase: 'hold', duration: 4, circleClass: 'hold-rest' }
                 ]
             },
             '478': {
                 name: '4-7-8 Technique',
                 description: 'Promotes relaxation and helps with sleep. Inhale 4, hold 7, exhale 8.',
                 pattern: [
-                    { phase: 'inhale', duration: 4 },
-                    { phase: 'hold', duration: 7 },
-                    { phase: 'exhale', duration: 8 }
+                    { phase: 'inhale', duration: 4, circleClass: 'expand' },
+                    { phase: 'hold', duration: 7, circleClass: 'hold-expanded' },
+                    { phase: 'exhale', duration: 8, circleClass: 'rest' }
                 ]
             },
             calm: {
                 name: 'Calm Breathing',
                 description: 'Simple calming breath. Inhale 4, exhale 6.',
                 pattern: [
-                    { phase: 'inhale', duration: 4 },
-                    { phase: 'exhale', duration: 6 }
+                    { phase: 'inhale', duration: 4, circleClass: 'expand' },
+                    { phase: 'exhale', duration: 6, circleClass: 'rest' }
                 ]
             },
             energize: {
                 name: 'Energizing Breath',
                 description: 'Quick inhale, brief hold, longer exhale, brief hold. Increases alertness.',
                 pattern: [
-                    { phase: 'inhale', duration: 2 },
-                    { phase: 'hold', duration: 1 },
-                    { phase: 'exhale', duration: 4 },
-                    { phase: 'hold', duration: 1 }
+                    { phase: 'inhale', duration: 2, circleClass: 'expand' },
+                    { phase: 'hold', duration: 1, circleClass: 'hold-expanded' },
+                    { phase: 'exhale', duration: 4, circleClass: 'rest' },
+                    { phase: 'hold', duration: 1, circleClass: 'hold-rest' }
                 ]
             }
         };
@@ -279,6 +291,10 @@
             `;
         }
 
+        function setRunningUI(active) {
+            document.body.classList.toggle('breathing-active', active);
+        }
+
         function startBreathing() {
             if (isRunning) {
                 stopBreathing();
@@ -286,12 +302,14 @@
             }
 
             isRunning = true;
+            setRunningUI(true);
             startBtn.textContent = 'Pause';
             runBreathingCycle();
         }
 
         function stopBreathing() {
             isRunning = false;
+            setRunningUI(false);
             startBtn.textContent = 'Resume';
             clearInterval(breathingInterval);
         }
@@ -342,7 +360,8 @@
             instructionText.textContent = phaseText[phase.phase];
             
             // Update circle animation
-            circle.className = 'breathing-circle ' + phase.phase;
+            const circleClass = phase.circleClass || phase.phase;
+            circle.className = 'breathing-circle ' + circleClass;
             
             // Update timer
             timerText.textContent = phase.duration;

@@ -1,54 +1,44 @@
 // Icon pack for Kindle Dashboard
-// Using simple SVG icons optimized for e-ink displays
+// Uses Google Material Symbols so icons stay consistent and readable
 
 const Icons = {
     // Weather icons
     weather: {
-        clear: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="5"/>
-            <line x1="12" y1="1" x2="12" y2="3"/>
-            <line x1="12" y1="21" x2="12" y2="23"/>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-            <line x1="1" y1="12" x2="3" y2="12"/>
-            <line x1="21" y1="12" x2="23" y2="12"/>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-        </svg>`,
-        cloudy: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
-        </svg>`,
-        partlyCloudy: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M13 2v2m4.24 1.76l1.42 1.42M21 12h-2m-.76 4.24l-1.42 1.42"/>
-            <path d="M6 15a5 5 0 0 1 9.9-1.09A3.5 3.5 0 1 1 17 21H6a5 5 0 0 1 0-10z"/>
-        </svg>`,
-        rain: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M16 13v8m-8-5v5m4-8v9"/>
-            <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
-        </svg>`,
-        snow: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25"/>
-            <line x1="8" y1="16" x2="8" y2="16"/>
-            <line x1="8" y1="20" x2="8" y2="20"/>
-            <line x1="12" y1="18" x2="12" y2="18"/>
-            <line x1="12" y1="22" x2="12" y2="22"/>
-            <line x1="16" y1="16" x2="16" y2="16"/>
-            <line x1="16" y1="20" x2="16" y2="20"/>
-        </svg>`,
-        thunderstorm: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M19 16.9A5 5 0 0 0 18 7h-1.26a8 8 0 1 0-11.62 9"/>
-            <polyline points="13 11 9 17 15 17 11 23"/>
-        </svg>`,
-        fog: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 15h18M3 19h14M5 11h14"/>
-        </svg>`,
-        wind: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/>
-        </svg>`
+        clear: 'sunny',
+        cloudy: 'cloud',
+        partlyCloudy: 'partly_cloudy_day',
+        rain: 'rainy',
+        snow: 'weather_snowy',
+        thunderstorm: 'thunderstorm',
+        fog: 'foggy',
+        wind: 'air'
     },
     
     // UI icons
     ui: {
+
+      home: 'home',
+        settings: 'settings',
+        menu: 'menu',
+        close: 'close',
+        check: 'check_circle',
+        save: 'save',
+        back: 'arrow_back',
+        notes: 'note_alt',
+        tasks: 'done_all',
+        timer: 'timer',
+        calculator: 'calculate',
+        weather: 'sunny_snowing',
+        calendar: 'calendar_month',
+        rss: 'rss_feed',
+        breathing: 'self_improvement',
+        contacts: 'contacts',
+        reading: 'menu_book',
+        drawing: 'ink_pen',
+        add: 'add',
+        remove: 'remove',
+        up: 'keyboard_arrow_up',
+        down: 'keyboard_arrow_down'
         home: `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
             <polyline points="9 22 9 12 15 12 15 22" fill="none"/>
@@ -161,10 +151,19 @@ function createIcon(category, name, className = '') {
         console.warn(`Icon not found: ${category}.${name}`);
         return document.createElement('div');
     }
-    
+
     const wrapper = document.createElement('div');
     wrapper.className = `icon ${className}`;
-    wrapper.innerHTML = icon;
+
+    if (typeof icon === 'string') {
+        const span = document.createElement('span');
+        span.className = 'material-symbols-rounded';
+        span.textContent = icon;
+        wrapper.appendChild(span);
+    } else {
+        wrapper.innerHTML = icon;
+    }
+
     return wrapper;
 }
 
