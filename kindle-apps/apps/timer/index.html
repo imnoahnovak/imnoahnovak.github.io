@@ -240,6 +240,7 @@
 
     <div class="timers-list" id="timers-list"></div>
 
+    <script src="../../confirm.js"></script>
     <script src="../../settings.js"></script>
     <script>
         let timers = [];
@@ -265,12 +266,18 @@
         }
 
         // Delete timer
-        function deleteTimer(id) {
-            if (confirm('Delete this timer?')) {
-                stopTimer(id);
-                timers = timers.filter(t => t.id !== id);
-                renderTimers();
-            }
+        async function deleteTimer(id) {
+            const confirmed = await showConfirmDialog({
+                message: 'Delete this timer?',
+                confirmText: 'Delete',
+                destructive: true
+            });
+
+            if (!confirmed) return;
+
+            stopTimer(id);
+            timers = timers.filter(t => t.id !== id);
+            renderTimers();
         }
 
         // Start/pause timer

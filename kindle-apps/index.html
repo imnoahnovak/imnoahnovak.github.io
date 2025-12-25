@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,300..700,0..1,-50..200&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="./style.css">
     <title>Kindle Dashboard</title>
 </head>
@@ -28,7 +31,7 @@
     <div class="app-drawer" id="app-drawer">
         <div class="drawer-header">
             <h2>Apps</h2>
-            <button class="close-drawer" id="close-drawer">×</button>
+            <button class="close-drawer" id="close-drawer" aria-label="Close apps">×</button>
         </div>
         <div class="drawer-apps" id="drawer-apps">
             <!-- Apps will be inserted here -->
@@ -165,7 +168,6 @@
                             <div id="conditions" class="conditions">Loading weather...</div>
                         </div>
                     </div>
-                    <div class="nav-hint">← Swipe to navigate →</div>
                 `
             },
             'dashboard-weather': {
@@ -178,7 +180,6 @@
                             <div class="loading">Loading forecast...</div>
                         </div>
                     </div>
-                    <div class="nav-hint">← Swipe to navigate →</div>
                 `
             },
             'dashboard-calendar': {
@@ -193,7 +194,6 @@
                             <div class="calendar-grid" id="calendar-grid"></div>
                         </div>
                     </div>
-                    <div class="nav-hint">← Swipe to navigate →</div>
                 `
             }
         };
@@ -204,10 +204,10 @@
             { name: 'Tasks', desc: 'To-do list manager', url: './apps/tasks/index.html', icon: 'tasks' },
             { name: 'Timer', desc: 'Multiple countdown timers', url: './apps/timer/index.html', icon: 'timer' },
             { name: 'Calculator', desc: 'Calculator + unit converter', url: './apps/calculator/index.html', icon: 'calculator' },
-            { name: 'RSS Reader', desc: 'Follow RSS/Atom feeds', url: './apps/rss/index.html', icon: 'notes' },
-            { name: 'Breathing', desc: 'Breathing exercises', url: './apps/breathing/index.html', icon: 'weather' },
-            { name: 'Contacts', desc: 'Local contact book', url: './apps/contacts/index.html', icon: 'tasks' },
-            { name: 'Reading Log', desc: 'Track your reading', url: './apps/reading-log/index.html', icon: 'notes' },
+            { name: 'RSS Reader', desc: 'Follow RSS/Atom feeds', url: './apps/rss/index.html', icon: 'rss' },
+            { name: 'Breathing', desc: 'Breathing exercises', url: './apps/breathing/index.html', icon: 'breathing' },
+            { name: 'Contacts', desc: 'Local contact book', url: './apps/contacts/index.html', icon: 'contacts' },
+            { name: 'Reading Log', desc: 'Track your reading', url: './apps/reading-log/index.html', icon: 'reading' },
             { name: 'Settings', desc: 'Configure dashboard', url: './apps/settings/index.html', icon: 'settings' }
         ];
 
@@ -226,7 +226,12 @@
                 const dashboard = document.createElement('div');
                 dashboard.className = 'dashboard' + (index === 0 ? ' active' : '');
                 dashboard.id = panel.id;
-                dashboard.innerHTML = panelTemplates[panel.id].render();
+                const template = panelTemplates[panel.id];
+                if (!template) {
+                    console.warn(`Unknown panel id "${panel.id}", skipping.`);
+                    return;
+                }
+                dashboard.innerHTML = template.render();
                 wrapper.appendChild(dashboard);
 
                 // Create indicator

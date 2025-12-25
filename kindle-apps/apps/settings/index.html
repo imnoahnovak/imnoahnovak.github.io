@@ -327,6 +327,7 @@
     <button class="save-btn" id="save-btn">Save Settings</button>
     <div class="save-status" id="save-status"></div>
 
+    <script src="../../confirm.js"></script>
     <script src="../../settings.js"></script>
     <script>
         let hasUnsavedChanges = false;
@@ -398,11 +399,17 @@
         });
         
         // Handle back button click
-        document.getElementById('back-link').addEventListener('click', (e) => {
-            if (hasUnsavedChanges) {
-                if (!confirm('You have unsaved changes. Do you want to leave without saving?')) {
-                    e.preventDefault();
-                }
+        document.getElementById('back-link').addEventListener('click', async (e) => {
+            if (!hasUnsavedChanges) return;
+
+            const confirmed = await showConfirmDialog({
+                message: 'Leave without saving changes?',
+                confirmText: 'Leave',
+                cancelText: 'Stay'
+            });
+
+            if (!confirmed) {
+                e.preventDefault();
             }
         });
 

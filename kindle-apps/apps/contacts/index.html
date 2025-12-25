@@ -310,6 +310,7 @@
         </div>
     </div>
 
+    <script src="../../confirm.js"></script>
     <script src="../../settings.js"></script>
     <script>
         const STORAGE_KEY = 'kindle-contacts';
@@ -473,14 +474,20 @@
         }
 
         // Delete current contact
-        function deleteCurrentContact() {
+        async function deleteCurrentContact() {
             if (!currentContactId) return;
 
-            if (confirm('Are you sure you want to delete this contact?')) {
-                contacts = contacts.filter(c => c.id !== currentContactId);
-                saveContacts();
-                showListView();
-            }
+            const confirmed = await showConfirmDialog({
+                message: 'Delete this contact?',
+                confirmText: 'Delete',
+                destructive: true
+            });
+
+            if (!confirmed) return;
+
+            contacts = contacts.filter(c => c.id !== currentContactId);
+            saveContacts();
+            showListView();
         }
 
         // Escape HTML
