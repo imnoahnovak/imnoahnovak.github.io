@@ -9,6 +9,7 @@ const PATTERN_OPACITY_LIGHT = 0.16;
 const DEFAULT_SETTINGS = {
     darkMode: 'off', // 'off', 'on', or 'time-based'
     timeFormat: '12hr', // '12hr' or '24hr'
+    clockStyle: 'digital', // 'digital' or 'analog'
     backgroundPattern: 'blank', // 'blank', 'dotted', 'striped'
     weatherLocation: {
         lat: 40.7128,
@@ -18,7 +19,9 @@ const DEFAULT_SETTINGS = {
     panels: [
         { id: 'dashboard-main', type: 'home', enabled: true, order: 0, removable: false },
         { id: 'dashboard-weather', type: 'panel', enabled: true, order: 1, removable: true },
-        { id: 'dashboard-calendar', type: 'panel', enabled: true, order: 2, removable: true }
+        { id: 'dashboard-calendar', type: 'panel', enabled: true, order: 2, removable: true },
+        { id: 'dashboard-reading-log', type: 'panel', enabled: true, order: 3, removable: true },
+        { id: 'dashboard-rss', type: 'panel', enabled: true, order: 4, removable: true }
     ]
 };
 
@@ -73,6 +76,12 @@ class SettingsManager {
         const filteredPanels = panels
             .filter(panel => panel && validIds.has(panel.id))
             .map(panel => ({ ...panel }));
+
+        DEFAULT_SETTINGS.panels.forEach(defaultPanel => {
+            if (!filteredPanels.some(panel => panel.id === defaultPanel.id)) {
+                filteredPanels.push({ ...defaultPanel });
+            }
+        });
 
         // Ensure required home panel always exists
         if (!filteredPanels.some(panel => panel.id === 'dashboard-main')) {

@@ -295,6 +295,20 @@
                 </label>
             </div>
         </div>
+        <div class="setting-item">
+            <label class="setting-label">Clock Style</label>
+            <div class="setting-description">Switch between a digital readout and an analog clock with hands</div>
+            <div class="radio-group">
+                <label class="radio-option">
+                    <input type="radio" name="clockStyle" value="digital">
+                    <span>Digital</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="clockStyle" value="analog">
+                    <span>Analog (clock hands)</span>
+                </label>
+            </div>
+        </div>
     </div>
 
     <div class="settings-section">
@@ -364,7 +378,14 @@
                     radio.checked = true;
                 }
             });
-            
+
+            const clockStyleRadios = document.querySelectorAll('input[name="clockStyle"]');
+            clockStyleRadios.forEach(radio => {
+                if (radio.value === (settings.clockStyle || 'digital')) {
+                    radio.checked = true;
+                }
+            });
+
             // Weather location
             document.getElementById('weather-lat').value = settings.weatherLocation.lat;
             document.getElementById('weather-lon').value = settings.weatherLocation.lon;
@@ -443,7 +464,9 @@
             const names = {
                 'dashboard-main': 'Home',
                 'dashboard-weather': 'Weather Forecast',
-                'dashboard-calendar': 'Calendar'
+                'dashboard-calendar': 'Calendar',
+                'dashboard-reading-log': 'Reading Log',
+                'dashboard-rss': 'RSS Updates'
             };
             return names[id] || id;
         }
@@ -502,7 +525,10 @@
                 // Get time format
                 const timeFormat = document.querySelector('input[name="timeFormat"]:checked').value;
                 settingsManager.setSetting('timeFormat', timeFormat);
-                
+
+                const clockStyle = document.querySelector('input[name="clockStyle"]:checked').value;
+                settingsManager.setSetting('clockStyle', clockStyle);
+
                 // Get weather location
                 const weatherLocation = {
                     lat: parseFloat(document.getElementById('weather-lat').value),

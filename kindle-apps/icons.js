@@ -33,6 +33,7 @@ const Icons = {
         breathing: 'self_improvement',
         contacts: 'contacts',
         reading: 'menu_book',
+        drawing: 'ink_pen',
         add: 'add',
         remove: 'remove',
         up: 'keyboard_arrow_up',
