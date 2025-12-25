@@ -243,9 +243,9 @@
                 const taskDiv = document.createElement('div');
                 taskDiv.className = 'task-item' + (task.completed ? ' completed' : '');
                 taskDiv.innerHTML = `
-                    <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${task.id})">
+                    <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} data-id="${task.id}">
                     <div class="task-text">${escapeHtml(task.text)}</div>
-                    <button class="task-delete" onclick="deleteTask(${task.id})">Delete</button>
+                    <button class="task-delete" data-id="${task.id}">Delete</button>
                 `;
                 taskList.appendChild(taskDiv);
             });
@@ -269,6 +269,24 @@
         document.getElementById('task-input').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 addTask();
+            }
+        });
+
+        // Event delegation for task list (delete buttons and checkboxes)
+        document.getElementById('task-list').addEventListener('click', (e) => {
+            // Handle delete button clicks
+            if (e.target.classList.contains('task-delete')) {
+                const id = parseInt(e.target.getAttribute('data-id'), 10);
+                if (id) {
+                    deleteTask(id);
+                }
+            }
+            // Handle checkbox clicks (for Kindle compatibility, use click instead of change)
+            else if (e.target.classList.contains('task-checkbox')) {
+                const id = parseInt(e.target.getAttribute('data-id'), 10);
+                if (id) {
+                    toggleTask(id);
+                }
             }
         });
 

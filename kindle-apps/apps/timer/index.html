@@ -388,7 +388,7 @@
                 timerDiv.innerHTML = `
                     <div class="timer-header">
                         <div class="timer-name">${escapeHtml(timer.name)}</div>
-                        <button class="timer-delete" onclick="deleteTimer(${timer.id})">Delete</button>
+                        <button class="timer-delete" data-id="${timer.id}">Delete</button>
                     </div>
                     
                     <div class="timer-display" id="display-${timer.id}">${formatTime(timer.remainingSeconds)}</div>
@@ -412,21 +412,21 @@
                         </div>
                         
                         <div class="presets">
-                            <button class="preset-btn" onclick="setPreset(${timer.id}, 0, 1, 0)">1 min</button>
-                            <button class="preset-btn" onclick="setPreset(${timer.id}, 0, 5, 0)">5 min</button>
-                            <button class="preset-btn" onclick="setPreset(${timer.id}, 0, 10, 0)">10 min</button>
-                            <button class="preset-btn" onclick="setPreset(${timer.id}, 0, 15, 0)">15 min</button>
-                            <button class="preset-btn" onclick="setPreset(${timer.id}, 0, 30, 0)">30 min</button>
-                            <button class="preset-btn" onclick="setPreset(${timer.id}, 1, 0, 0)">1 hour</button>
+                            <button class="preset-btn" data-id="${timer.id}" data-hours="0" data-minutes="1" data-seconds="0">1 min</button>
+                            <button class="preset-btn" data-id="${timer.id}" data-hours="0" data-minutes="5" data-seconds="0">5 min</button>
+                            <button class="preset-btn" data-id="${timer.id}" data-hours="0" data-minutes="10" data-seconds="0">10 min</button>
+                            <button class="preset-btn" data-id="${timer.id}" data-hours="0" data-minutes="15" data-seconds="0">15 min</button>
+                            <button class="preset-btn" data-id="${timer.id}" data-hours="0" data-minutes="30" data-seconds="0">30 min</button>
+                            <button class="preset-btn" data-id="${timer.id}" data-hours="1" data-minutes="0" data-seconds="0">1 hour</button>
                         </div>
                     ` : ''}
                     
                     <div class="timer-controls">
-                        <button class="timer-btn" onclick="toggleTimer(${timer.id})">
+                        <button class="timer-btn timer-toggle" data-id="${timer.id}">
                             ${timer.isRunning ? 'Pause' : timer.remainingSeconds > 0 ? 'Resume' : 'Start'}
                         </button>
                         ${timer.remainingSeconds > 0 || timer.isCompleted ? `
-                            <button class="timer-btn secondary" onclick="stopTimer(${timer.id})">Reset</button>
+                            <button class="timer-btn secondary timer-stop" data-id="${timer.id}">Reset</button>
                         ` : ''}
                     </div>
                 `;
@@ -444,6 +444,43 @@
 
         // Event listeners
         document.getElementById('add-timer-btn').addEventListener('click', addTimer);
+
+        // Event delegation for timer list
+        document.getElementById('timers-list').addEventListener('click', (e) => {
+            const target = e.target;
+            
+            // Handle delete button clicks
+            if (target.classList.contains('timer-delete')) {
+                const id = parseInt(target.getAttribute('data-id'), 10);
+                if (id) {
+                    deleteTimer(id);
+                }
+            }
+            // Handle toggle (start/pause/resume) button clicks
+            else if (target.classList.contains('timer-toggle')) {
+                const id = parseInt(target.getAttribute('data-id'), 10);
+                if (id) {
+                    toggleTimer(id);
+                }
+            }
+            // Handle stop/reset button clicks
+            else if (target.classList.contains('timer-stop')) {
+                const id = parseInt(target.getAttribute('data-id'), 10);
+                if (id) {
+                    stopTimer(id);
+                }
+            }
+            // Handle preset button clicks
+            else if (target.classList.contains('preset-btn')) {
+                const id = parseInt(target.getAttribute('data-id'), 10);
+                const hours = parseInt(target.getAttribute('data-hours'), 10);
+                const minutes = parseInt(target.getAttribute('data-minutes'), 10);
+                const seconds = parseInt(target.getAttribute('data-seconds'), 10);
+                if (id) {
+                    setPreset(id, hours, minutes, seconds);
+                }
+            }
+        });
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
