@@ -294,7 +294,7 @@
             sortedNotes.forEach(note => {
                 const noteDiv = document.createElement('div');
                 noteDiv.className = 'note-item';
-                noteDiv.onclick = () => openNote(note.id);
+                noteDiv.setAttribute('data-note-id', note.id);
 
                 const preview = note.content.substring(0, 100).replace(/\n/g, ' ');
                 const updated = new Date(note.updatedAt).toLocaleDateString();
@@ -407,6 +407,15 @@
         document.getElementById('delete-note-btn').addEventListener('click', deleteCurrentNote);
         document.getElementById('note-title').addEventListener('input', handleInput);
         document.getElementById('note-content').addEventListener('input', handleInput);
+
+        // Event delegation for note list interactions
+        document.getElementById('notes-list').addEventListener('click', (e) => {
+            const noteItem = e.target.closest('.note-item');
+            if (noteItem) {
+                const noteId = parseInt(noteItem.getAttribute('data-note-id'));
+                openNote(noteId);
+            }
+        });
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {

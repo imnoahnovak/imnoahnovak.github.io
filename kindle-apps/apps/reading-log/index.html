@@ -441,7 +441,7 @@
             filteredBooks.forEach(book => {
                 const bookDiv = document.createElement('div');
                 bookDiv.className = 'book-item ' + book.status;
-                bookDiv.onclick = () => openBook(book.id);
+                bookDiv.setAttribute('data-book-id', book.id);
 
                 const statusText = {
                     'want-to-read': 'Want to Read',
@@ -598,6 +598,15 @@
         document.getElementById('back-to-list-btn').addEventListener('click', showListView);
         document.getElementById('save-book-btn').addEventListener('click', saveCurrentBook);
         document.getElementById('delete-book-btn').addEventListener('click', deleteCurrentBook);
+
+        // Event delegation for book list interactions
+        document.getElementById('books-list').addEventListener('click', (e) => {
+            const bookItem = e.target.closest('.book-item');
+            if (bookItem) {
+                const bookId = parseInt(bookItem.getAttribute('data-book-id'));
+                openBook(bookId);
+            }
+        });
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {

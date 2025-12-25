@@ -368,7 +368,7 @@
             filteredContacts.forEach(contact => {
                 const contactDiv = document.createElement('div');
                 contactDiv.className = 'contact-item';
-                contactDiv.onclick = () => openContact(contact.id);
+                contactDiv.setAttribute('data-contact-id', contact.id);
 
                 const preview = [];
                 if (contact.phone) preview.push(contact.phone);
@@ -497,6 +497,15 @@
         document.getElementById('delete-contact-btn').addEventListener('click', deleteCurrentContact);
         document.getElementById('search-input').addEventListener('input', (e) => {
             renderContactList(e.target.value);
+        });
+
+        // Event delegation for contact list interactions
+        document.getElementById('contacts-list').addEventListener('click', (e) => {
+            const contactItem = e.target.closest('.contact-item');
+            if (contactItem) {
+                const contactId = parseInt(contactItem.getAttribute('data-contact-id'));
+                openContact(contactId);
+            }
         });
 
         // Initialize
