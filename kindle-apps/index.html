@@ -580,18 +580,8 @@
                 // Apply theme
                 settingsManager.applyTheme();
                 
-                // Initialize dashboards and drawer
-                initDashboards();
-                initAppDrawer();
-                
-                // Update time every minute
-                setInterval(updateTime, 60000);
-                
-                // Update weather every 30 minutes
-                setInterval(fetchWeather, 1800000);
-                
-                // Update theme hourly (for time-based dark mode)
-                setInterval(() => settingsManager.applyTheme(), 3600000);
+                // Attach global event listeners BEFORE initialization
+                // This ensures UI controls remain responsive even if dashboard generation fails
                 
                 // Event listeners for drawer
                 document.getElementById('close-drawer').addEventListener('click', closeDrawer);
@@ -608,6 +598,19 @@
                         closeDrawer();
                     }
                 });
+                
+                // Initialize dashboards and drawer AFTER event listeners
+                initDashboards();
+                initAppDrawer();
+                
+                // Update time every minute
+                setInterval(updateTime, 60000);
+                
+                // Update weather every 30 minutes
+                setInterval(fetchWeather, 1800000);
+                
+                // Update theme hourly (for time-based dark mode)
+                setInterval(() => settingsManager.applyTheme(), 3600000);
             } catch (error) {
                 showError('Failed to initialize dashboard', error);
             }
