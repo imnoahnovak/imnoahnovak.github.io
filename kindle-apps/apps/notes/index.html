@@ -413,7 +413,9 @@
             const noteItem = e.target.closest('.note-item');
             if (noteItem) {
                 const noteId = parseInt(noteItem.getAttribute('data-note-id'));
-                openNote(noteId);
+                if (!isNaN(noteId)) {
+                    openNote(noteId);
+                }
             }
         });
 

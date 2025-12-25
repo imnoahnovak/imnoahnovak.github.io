@@ -276,14 +276,18 @@
         document.getElementById('task-list').addEventListener('change', (e) => {
             if (e.target.classList.contains('task-checkbox')) {
                 const id = parseInt(e.target.getAttribute('data-id'));
-                toggleTask(id);
+                if (!isNaN(id)) {
+                    toggleTask(id);
+                }
             }
         });
 
         document.getElementById('task-list').addEventListener('click', (e) => {
             if (e.target.classList.contains('task-delete')) {
                 const id = parseInt(e.target.getAttribute('data-id'));
-                deleteTask(id);
+                if (!isNaN(id)) {
+                    deleteTask(id);
+                }
             }
         });
 

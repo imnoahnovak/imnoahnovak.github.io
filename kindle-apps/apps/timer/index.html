@@ -448,6 +448,7 @@
         // Event delegation for timer interactions
         document.getElementById('timers-list').addEventListener('click', (e) => {
             const timerId = parseInt(e.target.getAttribute('data-timer-id'));
+            if (isNaN(timerId)) return;
             
             if (e.target.classList.contains('timer-delete')) {
                 deleteTimer(timerId);
@@ -459,7 +460,9 @@
                 const hours = parseInt(e.target.getAttribute('data-hours'));
                 const minutes = parseInt(e.target.getAttribute('data-minutes'));
                 const seconds = parseInt(e.target.getAttribute('data-seconds'));
-                setPreset(timerId, hours, minutes, seconds);
+                if (!isNaN(hours) && !isNaN(minutes) && !isNaN(seconds)) {
+                    setPreset(timerId, hours, minutes, seconds);
+                }
             }
         });
 

@@ -504,7 +504,9 @@
             const contactItem = e.target.closest('.contact-item');
             if (contactItem) {
                 const contactId = parseInt(contactItem.getAttribute('data-contact-id'));
-                openContact(contactId);
+                if (!isNaN(contactId)) {
+                    openContact(contactId);
+                }
             }
         });
 

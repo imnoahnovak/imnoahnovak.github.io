@@ -604,7 +604,9 @@
             const bookItem = e.target.closest('.book-item');
             if (bookItem) {
                 const bookId = parseInt(bookItem.getAttribute('data-book-id'));
-                openBook(bookId);
+                if (!isNaN(bookId)) {
+                    openBook(bookId);
+                }
             }
         });
 
