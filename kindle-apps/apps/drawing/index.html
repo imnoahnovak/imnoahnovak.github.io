@@ -235,19 +235,14 @@
 
         function resizeCanvas() {
             const wrapper = document.getElementById('canvas-wrapper');
-            const data = canvas.toDataURL();
-            const img = new Image();
-            img.onload = () => {
+            const snapshot = new Image();
+            snapshot.onload = () => {
                 canvas.width = wrapper.clientWidth;
                 canvas.height = Math.max(360, wrapper.clientWidth * 0.65);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                if (backgroundData) {
-                    applyBackgroundImage(backgroundData);
-                }
+                redrawBase();
+                ctx.drawImage(snapshot, 0, 0, canvas.width, canvas.height);
             };
-            img.src = data;
+            snapshot.src = canvas.toDataURL();
         }
 
         function applyBackgroundImage(dataUrl) {
@@ -478,6 +473,7 @@
             wrapper.addEventListener('pointermove', move);
             wrapper.addEventListener('pointerup', () => stopDraw());
             wrapper.addEventListener('pointerleave', () => stopDraw());
+            wrapper.addEventListener('pointercancel', () => stopDraw());
         }
 
         document.addEventListener('DOMContentLoaded', () => {
