@@ -448,7 +448,7 @@
         // Event delegation for timer actions
         document.getElementById('timers-list').addEventListener('click', (e) => {
             const target = e.target;
-            if (!target.dataset.id) return;
+            if (!target.dataset.id || !target.dataset.action) return;
             
             const id = parseInt(target.dataset.id);
             const action = target.dataset.action;
@@ -460,9 +460,9 @@
             } else if (action === 'stop') {
                 stopTimer(id);
             } else if (action === 'preset') {
-                const hours = parseInt(target.dataset.hours) || 0;
-                const minutes = parseInt(target.dataset.minutes) || 0;
-                const seconds = parseInt(target.dataset.seconds) || 0;
+                const hours = parseInt(target.dataset.hours);
+                const minutes = parseInt(target.dataset.minutes);
+                const seconds = parseInt(target.dataset.seconds);
                 setPreset(id, hours, minutes, seconds);
             }
         });

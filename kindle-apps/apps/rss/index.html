@@ -387,15 +387,21 @@
 
         // Event delegation for feed list
         document.getElementById('feed-list').addEventListener('click', (e) => {
-            const pill = e.target.closest('.feed-pill');
-            if (!pill) return;
+            const target = e.target;
             
             // Check if remove button was clicked
-            if (e.target.classList.contains('feed-remove')) {
+            if (target.dataset.action === 'remove') {
                 e.stopPropagation();
-                removeFeed(pill.dataset.url);
-            } else {
-                // Load feed
+                const pill = target.closest('.feed-pill');
+                if (pill && pill.dataset.url) {
+                    removeFeed(pill.dataset.url);
+                }
+                return;
+            }
+            
+            // Load feed if pill was clicked
+            const pill = target.closest('.feed-pill');
+            if (pill && pill.dataset.url) {
                 loadFeed(pill.dataset.url);
             }
         });
