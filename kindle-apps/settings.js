@@ -1,9 +1,9 @@
 // Settings management for Kindle Dashboard
 const SETTINGS_KEY = 'kindle-dashboard-settings';
 
-// Pattern opacity constants
-const PATTERN_OPACITY_DARK = 0.12;
-const PATTERN_OPACITY_LIGHT = 0.08;
+// Pattern opacity constants (boosted for better visibility)
+const PATTERN_OPACITY_DARK = 0.22;
+const PATTERN_OPACITY_LIGHT = 0.16;
 
 // Default settings
 const DEFAULT_SETTINGS = {
@@ -123,11 +123,13 @@ class SettingsManager {
             document.documentElement.style.setProperty('--text-color', '#eeeeee');
             document.documentElement.style.setProperty('--muted-color', '#aaaaaa');
             document.documentElement.style.setProperty('--border-color', '#eeeeee');
+            document.documentElement.style.setProperty('--surface-color', '#111111');
         } else {
             document.documentElement.style.setProperty('--background-color', '#ffffff');
             document.documentElement.style.setProperty('--text-color', '#000000');
             document.documentElement.style.setProperty('--muted-color', '#333333');
             document.documentElement.style.setProperty('--border-color', '#000000');
+            document.documentElement.style.setProperty('--surface-color', '#f6f6f6');
         }
         // Apply background pattern after theme colors are set
         this.applyBackgroundPattern();

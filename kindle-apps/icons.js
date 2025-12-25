@@ -118,6 +118,26 @@ const Icons = {
             <line x1="8" y1="2" x2="8" y2="6"/>
             <line x1="3" y1="10" x2="21" y2="10"/>
         </svg>`,
+        rss: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 11a8 8 0 0 1 8 8"/>
+            <path d="M5 5a14 14 0 0 1 14 14"/>
+            <circle cx="6" cy="18" r="2" fill="currentColor" stroke="none"/>
+        </svg>`,
+        breathing: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 3a9 9 0 0 0-9 9" stroke-dasharray="3 2"/>
+            <path d="M12 21a9 9 0 0 0 9-9" stroke-dasharray="3 2"/>
+        </svg>`,
+        contacts: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M6 20c0-3.31 2.69-6 6-6s6 2.69 6 6"/>
+            <line x1="4" y1="6" x2="8" y2="6"/>
+            <line x1="16" y1="6" x2="20" y2="6"/>
+        </svg>`,
+        reading: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 5h7a2 2 0 0 1 2 2v12l-3-2-3 2V7a2 2 0 0 0-2-2z"/>
+            <path d="M13 5h7a2 2 0 0 1 2 2v12l-3-2-3 2"/>
+        </svg>`,
         add: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="12" y1="5" x2="12" y2="19"/>
             <line x1="5" y1="12" x2="19" y2="12"/>
