@@ -161,7 +161,6 @@
                             <div id="date" class="date">Loading...</div>
                         </div>
                         <div class="weather-display">
-                            <div id="weather-icon" class="weather-icon"></div>
                             <div id="temperature" class="temperature">--°</div>
                             <div id="conditions" class="conditions">Loading weather...</div>
                         </div>
@@ -397,7 +396,6 @@
                 // Update current weather display
                 const tempEl = document.getElementById('temperature');
                 const conditionsEl = document.getElementById('conditions');
-                const weatherIconEl = document.getElementById('weather-icon');
                 
                 if (current) {
                     // Use actual current observations
@@ -410,11 +408,6 @@
                     if (conditionsEl) {
                         conditionsEl.textContent = current.textDescription || 'N/A';
                     }
-                    if (weatherIconEl) {
-                        weatherIconEl.innerHTML = '';
-                        const icon = safeGetWeatherIcon(current.textDescription || '');
-                        weatherIconEl.appendChild(icon);
-                    }
                 } else {
                     // Fallback to forecast data if observations unavailable
                     const forecastResponse = await fetch(pointData.properties.forecast);
@@ -424,11 +417,6 @@
                     
                     if (tempEl) tempEl.textContent = firstPeriod.temperature + '°' + firstPeriod.temperatureUnit;
                     if (conditionsEl) conditionsEl.textContent = firstPeriod.shortForecast;
-                    if (weatherIconEl) {
-                        weatherIconEl.innerHTML = '';
-                        const icon = safeGetWeatherIcon(firstPeriod.shortForecast);
-                        weatherIconEl.appendChild(icon);
-                    }
                 }
                 
                 // Get forecast for forecast dashboard
@@ -444,16 +432,8 @@
                         const item = document.createElement('div');
                         item.className = 'forecast-item';
                         
-                        const iconDiv = document.createElement('div');
-                        iconDiv.className = 'forecast-icon';
-                        const icon = safeGetWeatherIcon(period.shortForecast);
-                        iconDiv.appendChild(icon);
-                        
                         item.innerHTML = `
                             <div class="forecast-time">${period.name}</div>
-                        `;
-                        item.appendChild(iconDiv);
-                        item.innerHTML += `
                             <div class="forecast-temp">${period.temperature}°${period.temperatureUnit}</div>
                             <div class="forecast-desc">${period.shortForecast}</div>
                         `;
@@ -464,12 +444,10 @@
                 console.error('Weather fetch error:', error);
                 const tempEl = document.getElementById('temperature');
                 const conditionsEl = document.getElementById('conditions');
-                const weatherIconEl = document.getElementById('weather-icon');
                 const forecastList = document.getElementById('forecast');
                 
                 if (tempEl) tempEl.textContent = 'N/A';
                 if (conditionsEl) conditionsEl.textContent = 'Weather unavailable';
-                if (weatherIconEl) weatherIconEl.textContent = '○';
                 if (forecastList) {
                     forecastList.innerHTML = '<div class="error">Unable to load forecast. Check location in settings.</div>';
                 }
