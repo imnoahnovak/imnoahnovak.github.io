@@ -100,24 +100,26 @@ body.bg-striped {
 
 .weather-display {
   border: 2px solid var(--border-color);
-  padding: 30px;
+  background-color: var(--border-color);
+  color: var(--background-color);
+  padding: 15px;
   margin-top: 20px;
 }
 
 .weather-icon {
-  font-size: 48px;
-  margin-bottom: 15px;
-}
-
-.temperature {
-  font-size: 48px;
-  font-weight: bold;
+  font-size: 36px;
   margin-bottom: 10px;
 }
 
+.temperature {
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
 .conditions {
-  font-size: 18px;
-  color: var(--muted-color);
+  font-size: 16px;
+  opacity: 0.9;
 }
 
 /* Weather Forecast Dashboard */
@@ -576,12 +578,16 @@ body.bg-striped {
   }
 
   .temperature {
-    font-size: 40px;
+    font-size: 32px;
+  }
+
+  .weather-icon {
+    font-size: 32px;
   }
 
   .weather-icon .icon {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
   }
 
   .dashboard-title {
