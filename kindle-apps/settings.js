@@ -1,6 +1,10 @@
 // Settings management for Kindle Dashboard
 const SETTINGS_KEY = 'kindle-dashboard-settings';
 
+// Pattern opacity constants
+const PATTERN_OPACITY_DARK = 0.12;
+const PATTERN_OPACITY_LIGHT = 0.08;
+
 // Default settings
 const DEFAULT_SETTINGS = {
     darkMode: 'off', // 'off', 'on', or 'time-based'
@@ -88,11 +92,14 @@ class SettingsManager {
             document.documentElement.style.setProperty('--background-color', '#222222');
             document.documentElement.style.setProperty('--text-color', '#eeeeee');
             document.documentElement.style.setProperty('--muted-color', '#aaaaaa');
+            document.documentElement.style.setProperty('--border-color', '#eeeeee');
         } else {
             document.documentElement.style.setProperty('--background-color', '#ffffff');
             document.documentElement.style.setProperty('--text-color', '#000000');
             document.documentElement.style.setProperty('--muted-color', '#333333');
+            document.documentElement.style.setProperty('--border-color', '#000000');
         }
+        // Apply background pattern after theme colors are set
         this.applyBackgroundPattern();
     }
 
@@ -107,14 +114,10 @@ class SettingsManager {
         // Apply new pattern
         body.classList.add(`bg-${pattern}`);
         
-        // Set pattern colors based on theme
-        if (pattern === 'dotted') {
-            const dotColor = isDark ? 'rgba(238, 238, 238, 0.15)' : 'rgba(0, 0, 0, 0.08)';
-            document.documentElement.style.setProperty('--pattern-color', dotColor);
-        } else if (pattern === 'striped') {
-            const stripeColor = isDark ? 'rgba(238, 238, 238, 0.08)' : 'rgba(0, 0, 0, 0.05)';
-            document.documentElement.style.setProperty('--pattern-color', stripeColor);
-        }
+        // Set pattern colors based on theme for all patterns
+        const opacity = isDark ? PATTERN_OPACITY_DARK : PATTERN_OPACITY_LIGHT;
+        const baseColor = isDark ? '238, 238, 238' : '0, 0, 0';
+        document.documentElement.style.setProperty('--pattern-color', `rgba(${baseColor}, ${opacity})`);
     }
 
     resetToDefaults() {
