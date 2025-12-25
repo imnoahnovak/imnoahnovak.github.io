@@ -33,6 +33,11 @@ class SettingsManager {
             const stored = localStorage.getItem(SETTINGS_KEY);
             if (stored) {
                 const parsed = JSON.parse(stored);
+                // Validate that panels is an array
+                if (parsed.panels && !Array.isArray(parsed.panels)) {
+                    console.warn('Invalid panels data in settings, resetting to default');
+                    parsed.panels = DEFAULT_SETTINGS.panels;
+                }
                 // Merge with defaults to ensure new settings are present
                 return { ...DEFAULT_SETTINGS, ...parsed };
             }
