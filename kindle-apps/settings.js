@@ -96,12 +96,12 @@ class SettingsManager {
         if (this.isDarkMode()) {
             document.documentElement.style.setProperty('--background-color', '#222222');
             document.documentElement.style.setProperty('--text-color', '#eeeeee');
-            document.documentElement.style.setProperty('--muted-color', '#aaaaaa');
+            document.documentElement.style.setProperty('--muted-color', '#cccccc');
             document.documentElement.style.setProperty('--border-color', '#eeeeee');
         } else {
             document.documentElement.style.setProperty('--background-color', '#ffffff');
             document.documentElement.style.setProperty('--text-color', '#000000');
-            document.documentElement.style.setProperty('--muted-color', '#333333');
+            document.documentElement.style.setProperty('--muted-color', '#111111');
             document.documentElement.style.setProperty('--border-color', '#000000');
         }
         // Apply background pattern after theme colors are set

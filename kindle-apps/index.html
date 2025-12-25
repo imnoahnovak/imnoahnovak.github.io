@@ -377,17 +377,63 @@
                 if (!forecastResponse.ok) throw new Error('Forecast fetch failed');
                 const forecastData = await forecastResponse.json();
                 
-                // Current conditions (first period)
-                const current = forecastData.properties.periods[0];
+                // Try to get current conditions from observation stations
+                let currentTemp = null;
+                let currentConditions = null;
+                try {
+                    // Get observation stations
+                    const stationsUrl = pointData.properties.observationStations;
+                    const stationsResponse = await fetch(stationsUrl);
+                    if (stationsResponse.ok) {
+                        const stationsData = await stationsResponse.json();
+                        const stations = stationsData.features || [];
+                        
+                        if (stations.length > 0) {
+                            // Get latest observation from first station
+                            const stationId = stations[0].id;
+                            const observationResponse = await fetch(`${stationId}/observations/latest`);
+                            if (observationResponse.ok) {
+                                const observationData = await observationResponse.json();
+                                const obs = observationData.properties;
+                                
+                                // Get temperature (convert from Celsius to Fahrenheit)
+                                if (obs.temperature && obs.temperature.value !== null) {
+                                    const tempC = obs.temperature.value;
+                                    currentTemp = Math.round((tempC * 9/5) + 32);
+                                }
+                                
+                                // Get text description
+                                if (obs.textDescription) {
+                                    currentConditions = obs.textDescription;
+                                }
+                            }
+                        }
+                    }
+                } catch (obsError) {
+                    console.warn('Observation fetch failed, falling back to forecast:', obsError);
+                }
+                
+                // Fallback to forecast if observation data not available
+                if (currentTemp === null || currentConditions === null) {
+                    const current = forecastData.properties.periods[0];
+                    if (currentTemp === null) {
+                        currentTemp = current.temperature;
+                    }
+                    if (currentConditions === null) {
+                        currentConditions = current.shortForecast;
+                    }
+                }
+                
+                // Display current conditions
                 const tempEl = document.getElementById('temperature');
                 const conditionsEl = document.getElementById('conditions');
                 const weatherIconEl = document.getElementById('weather-icon');
                 
-                if (tempEl) tempEl.textContent = current.temperature + '°' + current.temperatureUnit;
-                if (conditionsEl) conditionsEl.textContent = current.shortForecast;
+                if (tempEl) tempEl.textContent = currentTemp + '°F';
+                if (conditionsEl) conditionsEl.textContent = currentConditions;
                 if (weatherIconEl) {
                     weatherIconEl.innerHTML = '';
-                    const icon = safeGetWeatherIcon(current.shortForecast);
+                    const icon = safeGetWeatherIcon(currentConditions);
                     weatherIconEl.appendChild(icon);
                 }
                 

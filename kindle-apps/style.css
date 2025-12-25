@@ -3,7 +3,7 @@
   --background-color: #ffffff;
   --text-color: #000000;
   --border-color: #000000;
-  --muted-color: #333333;
+  --muted-color: #111111;
   --pattern-color: rgba(0, 0, 0, 0.08);
 }
 
@@ -83,14 +83,14 @@ body.bg-striped {
 
 /* Main Dashboard - Time, Date, Weather */
 .time-display {
-  margin-bottom: 40px;
+  margin-bottom: 20px;
 }
 
 .clock {
   font-size: 72px;
   font-weight: bold;
   letter-spacing: 0.05em;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
 
 .date {
@@ -100,19 +100,19 @@ body.bg-striped {
 
 .weather-display {
   border: 2px solid var(--border-color);
-  padding: 30px;
-  margin-top: 20px;
+  padding: 15px;
+  margin-top: 10px;
 }
 
 .weather-icon {
   font-size: 48px;
-  margin-bottom: 15px;
+  margin-bottom: 8px;
 }
 
 .temperature {
   font-size: 48px;
   font-weight: bold;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
 
 .conditions {
